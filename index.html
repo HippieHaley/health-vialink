@@ -115,6 +115,30 @@
     width: 100%;
   }
 
+  .chart-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+  }
+
+  .tooltip-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ink);
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-family: 'VT323', monospace;
+  }
+
+  .tooltip-toggle input {
+    accent-color: var(--teal);
+    width: 14px;
+    height: 14px;
+    margin: 0;
+  }
+
   svg {
     width: 100%;
     min-width: 1200px;
@@ -131,16 +155,17 @@
     background: rgba(10, 10, 10, 0.92);
     border: 1px solid rgba(255,255,255,0.2);
     border-radius: 10px;
-    padding: 4px 8px;
+    padding: 6px 10px;
     font-family: 'VT323', monospace;
-    font-size: 15px;
-    letter-spacing: 0.06em;
+    font-size: 14px;
+    letter-spacing: 0.05em;
     color: var(--ink);
     text-transform: uppercase;
     opacity: 0;
     transition: opacity 0.12s ease;
     white-space: nowrap;
     box-shadow: 0 0 12px rgba(0,245,255,0.18);
+    line-height: 1.35;
   }
 
   #chart-tooltip.visible {
@@ -311,6 +336,12 @@
   <div class="panel">
     <h2>Layers</h2>
     <div class="layers" id="layerToggles"></div>
+    <div class="chart-toolbar">
+      <label class="tooltip-toggle">
+        <input type="checkbox" id="showAllTooltipInfo">
+        <span>Show all info</span>
+      </label>
+    </div>
     <div class="chart-scroll">
       <div class="chart-wrapper">
         <svg id="chart" viewBox="0 0 1200 480" preserveAspectRatio="xMidYMid meet"></svg>
@@ -837,12 +868,53 @@ function formatApproxDateFromX(x, yearMin, yearMax, marginLeft, plotW) {
   const year = Math.floor(yearFloat);
   const monthIndex = Math.min(11, Math.max(0, Math.round((yearFloat - year) * 12)));
   const date = new Date(year, monthIndex, 1);
-  return new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(date);
+  return {
+    date,
+    label: new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(date),
+    iso: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-01`
+  };
+}
+
+function getClosestVitalSnapshot(dateObj) {
+  let closest = null;
+  let bestDiff = Infinity;
+  vitals.forEach((v) => {
+    const diff = Math.abs(parseDate(v.date) - dateObj);
+    if (diff < bestDiff) {
+      bestDiff = diff;
+      closest = v;
+    }
+  });
+  return closest;
+}
+
+function getActiveMedsSnapshot(dateObj, showAll = false) {
+  const selectedCategoryIds = showAll
+    ? categories.map((c) => c.id)
+    : categories.filter((c) => layerState[c.id] !== false).map((c) => c.id);
+
+  return meds.filter((m) => {
+    const start = parseDate(m.start);
+    const end = parseDate(m.end || TODAY);
+    const inWindow = start <= dateObj && end >= dateObj;
+    return inWindow && (showAll || selectedCategoryIds.includes(m.categoryId));
+  });
+}
+
+function getSelectedVitalMetrics(showAll = false) {
+  const metricOrder = [
+    { key: 'weight', label: 'Weight', enabled: layerState.weight },
+    { key: 'sys', label: 'Systolic', enabled: layerState.systolic },
+    { key: 'dia', label: 'Diastolic', enabled: layerState.diastolic }
+  ];
+
+  return metricOrder.filter((item) => showAll || item.enabled);
 }
 
 function attachChartHoverTracking() {
   const svg = document.getElementById('chart');
   const tooltip = document.getElementById('chart-tooltip');
+  const showAllToggle = document.getElementById('showAllTooltipInfo');
   if (!svg || !tooltip) return;
 
   const updateTooltip = (event) => {
@@ -852,9 +924,38 @@ function attachChartHoverTracking() {
     const yearMax = Number(svg.dataset.yearMax || 2026);
     const marginLeft = Number(svg.dataset.marginLeft || 170);
     const plotW = Number(svg.dataset.plotW || 820);
-    const approxDate = formatApproxDateFromX(x, yearMin, yearMax, marginLeft, plotW);
+    const approx = formatApproxDateFromX(x, yearMin, yearMax, marginLeft, plotW);
+    const dateObj = new Date(approx.iso + 'T00:00:00');
+    const showAll = showAllToggle ? showAllToggle.checked : false;
+    const vital = getClosestVitalSnapshot(dateObj);
+    const medsActive = getActiveMedsSnapshot(dateObj, showAll);
+    const activeMetrics = getSelectedVitalMetrics(showAll);
 
-    tooltip.textContent = approxDate;
+    const lines = [`<strong>${approx.label}</strong>`];
+
+    if (vital) {
+      const metricLines = activeMetrics.map((metric) => {
+        const value = vital[metric.key];
+        return value != null ? `${metric.label}: ${value}${metric.key === 'weight' ? ' lb' : ''}` : null;
+      }).filter(Boolean);
+
+      if (metricLines.length) {
+        lines.push(...metricLines);
+      }
+    }
+
+    if (medsActive.length) {
+      lines.push('Meds:');
+      medsActive.forEach((m) => {
+        const category = categories.find((c) => c.id === m.categoryId);
+        const label = category ? category.name : 'Medication';
+        lines.push(`${label}: ${m.name}`);
+      });
+    } else if (showAll || Object.values(layerState).some(Boolean)) {
+      lines.push('Meds: none');
+    }
+
+    tooltip.innerHTML = lines.join('<br>');
     tooltip.style.left = `${Math.min(Math.max(x, marginLeft), marginLeft + plotW)}px`;
     tooltip.style.top = `${Math.max(18, event.clientY - rect.top - 6)}px`;
     tooltip.classList.add('visible');
