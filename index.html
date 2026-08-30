@@ -185,7 +185,7 @@
 
   svg {
     width: 100%;
-    min-width: 1400px;
+    min-width: 1600px;
     height: auto;
     display: block;
   }
@@ -806,6 +806,52 @@ let vitalTableState = { key: 'date', dir: 'asc' };
 let chartRange = { start: '', end: '' };
 let layerState = { ssri: true, sleep: true, adhd: true, weight: false, systolic: false, diastolic: false, pulse: true, temp: true, respirations: true };
 
+const CHART_WINDOW_YEARS = 10;
+
+function toISODate(date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function getDefaultChartRange(bounds) {
+  const maxDate = parseDate(bounds.max);
+  const minDate = parseDate(bounds.min);
+  const startDate = new Date(maxDate);
+  startDate.setFullYear(startDate.getFullYear() - CHART_WINDOW_YEARS);
+
+  if (startDate < minDate) {
+    return { start: bounds.min, end: bounds.max };
+  }
+
+  return { start: toISODate(startDate), end: bounds.max };
+}
+
+function clampChartRange(start, end, bounds) {
+  let nextStart = start || bounds.min;
+  let nextEnd = end || bounds.max;
+
+  if (nextStart && nextEnd && nextStart > nextEnd) {
+    [nextStart, nextEnd] = [nextEnd, nextStart];
+  }
+
+  const startDate = parseDate(nextStart || bounds.min);
+  const endDate = parseDate(nextEnd || bounds.max);
+  const maxSpanMs = CHART_WINDOW_YEARS * 365.2425 * 24 * 60 * 60 * 1000;
+
+  if (endDate - startDate > maxSpanMs) {
+    const clampedEnd = new Date(endDate);
+    const clampedStart = new Date(clampedEnd);
+    clampedStart.setFullYear(clampedEnd.getFullYear() - CHART_WINDOW_YEARS);
+
+    if (clampedStart < parseDate(bounds.min)) {
+      return { start: bounds.min, end: bounds.max };
+    }
+
+    return { start: toISODate(clampedStart), end: toISODate(clampedEnd) };
+  }
+
+  return { start: nextStart, end: nextEnd };
+}
+
 function getChartRangeDates() {
   const start = chartRange.start ? parseDate(chartRange.start) : null;
   const end = chartRange.end ? parseDate(chartRange.end) : null;
@@ -974,8 +1020,15 @@ function syncChartRangeInputs() {
   const endEl = document.getElementById('chartEndDate');
   if (!startEl || !endEl) return;
 
-  if (!chartRange.start) chartRange.start = bounds.min;
-  if (!chartRange.end) chartRange.end = bounds.max;
+  if (!chartRange.start || !chartRange.end) {
+    const defaultRange = getDefaultChartRange(bounds);
+    chartRange.start = defaultRange.start;
+    chartRange.end = defaultRange.end;
+  }
+
+  const clamped = clampChartRange(chartRange.start, chartRange.end, bounds);
+  chartRange.start = clamped.start;
+  chartRange.end = clamped.end;
 
   startEl.value = chartRange.start;
   endEl.value = chartRange.end;
@@ -1353,7 +1406,7 @@ function renderChart() {
   svg.innerHTML = '';
 
   const { start: rangeStart, end: rangeEnd } = getChartRangeDates();
-  const W = 980, H = 480;
+  const W = 1400, H = 520;
   const marginLeft = 170, marginRight = 60, marginTop = 20, marginBottom = 40;
   const plotW = W - marginLeft - marginRight;
   const plotTop = marginTop;
@@ -1639,22 +1692,22 @@ document.getElementById('applyChartRange').addEventListener('click', () => {
 
   const nextStart = startEl.value || '';
   const nextEnd = endEl.value || '';
-  if (nextStart && nextEnd && nextStart > nextEnd) {
-    chartRange.start = nextEnd;
-    chartRange.end = nextStart;
-  } else {
-    chartRange.start = nextStart;
-    chartRange.end = nextEnd;
-  }
+  const bounds = getChartDateBounds();
+  const clamped = clampChartRange(nextStart, nextEnd, bounds);
 
+  chartRange.start = clamped.start;
+  chartRange.end = clamped.end;
+
+  syncChartRangeInputs();
   renderChart();
   scrollChartToEnd();
 });
 
 document.getElementById('resetChartRange').addEventListener('click', () => {
   const bounds = getChartDateBounds();
-  chartRange.start = bounds.min;
-  chartRange.end = bounds.max;
+  const defaultRange = getDefaultChartRange(bounds);
+  chartRange.start = defaultRange.start;
+  chartRange.end = defaultRange.end;
   syncChartRangeInputs();
   renderChart();
   scrollChartToEnd();
