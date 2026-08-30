@@ -185,7 +185,7 @@
 
   svg {
     width: 100%;
-    min-width: 1600px;
+    min-width: 2000px;
     height: auto;
     display: block;
   }
@@ -1406,8 +1406,8 @@ function renderChart() {
   svg.innerHTML = '';
 
   const { start: rangeStart, end: rangeEnd } = getChartRangeDates();
-  const W = 1400, H = 520;
-  const marginLeft = 170, marginRight = 60, marginTop = 20, marginBottom = 40;
+  const W = 1700, H = 620;
+  const marginLeft = 190, marginRight = 70, marginTop = 28, marginBottom = 50;
   const plotW = W - marginLeft - marginRight;
   const plotTop = marginTop;
   svg.dataset.yearMin = String(0);
