@@ -186,7 +186,17 @@
     text-transform: uppercase;
   }
   .year-label { font-size: 11px; fill: var(--muted); }
-  .med-bar-label { font-size: 10px; fill: #fff; font-weight: 600; }
+  .med-bar-label {
+    font-size: 10px;
+    fill: var(--muted);
+    font-weight: 600;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    paint-order: stroke;
+    stroke: rgba(0, 0, 0, 0.9);
+    stroke-width: 1.4px;
+    letter-spacing: 0.02em;
+  }
   .axis-tick-label { font-size: 10px; fill: var(--muted); }
   .grid-line { stroke: var(--line); stroke-width: 1; }
   .note-text { font-size: 10.5px; fill: var(--muted); font-style: italic; }
@@ -1018,6 +1028,27 @@ function renderChart() {
   const medsInTimeOrder = [...meds].sort((a, b) => parseDate(a.start) - parseDate(b.start));
   medsInTimeOrder.forEach((m, index) => { m._colorIndex = index; });
 
+  function wrapSvgLabel(text, maxCharsPerLine = 16) {
+    const words = text.split(/\s+/).filter(Boolean);
+    if (!words.length) return [''];
+
+    const lines = [];
+    let current = '';
+
+    words.forEach((word) => {
+      const candidate = current ? `${current} ${word}` : word;
+      if (candidate.length <= maxCharsPerLine) {
+        current = candidate;
+      } else {
+        if (current) lines.push(current);
+        current = word;
+      }
+    });
+
+    if (current) lines.push(current);
+    return lines.slice(0, 3);
+  }
+
   const visibleCategories = categories.filter(cat => layerState[cat.id] !== false);
   const catLayout = {};
   let yCursor = plotTop;
@@ -1100,13 +1131,27 @@ function renderChart() {
       });
       svg.appendChild(rect);
       rect.appendChild(el('title', {}, `${m.name} (${m.start} to ${m.end === TODAY ? 'present' : m.end})${m.uncertain ? ' - unconfirmed' : ''}`));
-      if (w > 55) {
-        svg.appendChild(el('text', {
-          x: x1 + 6,
-          y: y + barHeight / 2 + 3.5,
+      if (w > 30) {
+        const maxCharsPerLine = Math.max(8, Math.floor(w / 6));
+        const wrapLines = wrapSvgLabel(m.name, maxCharsPerLine);
+        const label = el('text', {
+          x: x1 + w / 2,
+          y: y + 11,
           class: 'med-bar-label',
-          fill: m.uncertain ? '#000' : '#fff'
-        }, m.name.length > Math.floor(w / 6) ? m.name.slice(0, Math.floor(w / 6) - 1) + '…' : m.name));
+          fill: m.uncertain ? '#000' : 'var(--muted)',
+          'text-anchor': 'middle',
+          'paint-order': 'stroke'
+        });
+
+        wrapLines.forEach((line, index) => {
+          const tspan = el('tspan', {
+            x: x1 + w / 2,
+            dy: index === 0 ? 0 : 11
+          }, line);
+          label.appendChild(tspan);
+        });
+
+        svg.appendChild(label);
       }
     });
   });
