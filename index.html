@@ -105,20 +105,25 @@
 
   .chart-scroll {
     overflow-x: auto;
-    overflow-y: hidden;
+    overflow-y: visible;
     padding-bottom: 6px;
+    position: relative;
+    z-index: 1;
   }
 
   .chart-wrapper {
     position: relative;
     display: inline-block;
     width: 100%;
+    z-index: 2;
   }
 
   .chart-toolbar {
     display: flex;
     justify-content: flex-end;
     margin-bottom: 8px;
+    position: relative;
+    z-index: 1;
   }
 
   .tooltip-toggle {
@@ -147,12 +152,12 @@
   }
 
   #chart-tooltip {
-    position: absolute;
+    position: fixed;
     left: 0;
     top: 0;
-    transform: translate(-50%, -120%);
     pointer-events: none;
-    background: rgba(10, 10, 10, 0.92);
+    z-index: 2147483647;
+    background: rgba(10, 10, 10, 0.96);
     border: 1px solid rgba(255,255,255,0.2);
     border-radius: 10px;
     padding: 6px 10px;
@@ -163,9 +168,10 @@
     text-transform: uppercase;
     opacity: 0;
     transition: opacity 0.12s ease;
-    white-space: nowrap;
-    box-shadow: 0 0 12px rgba(0,245,255,0.18);
+    white-space: normal;
+    box-shadow: 0 0 18px rgba(0,245,255,0.28);
     line-height: 1.35;
+    max-width: 360px;
   }
 
   #chart-tooltip.visible {
@@ -956,8 +962,10 @@ function attachChartHoverTracking() {
     }
 
     tooltip.innerHTML = lines.join('<br>');
-    tooltip.style.left = `${Math.min(Math.max(x, marginLeft), marginLeft + plotW)}px`;
-    tooltip.style.top = `${Math.max(18, event.clientY - rect.top - 6)}px`;
+    const nextX = Math.min(Math.max(event.clientX + 12, 30), window.innerWidth - 30);
+    const nextY = Math.max(18, event.clientY - 12);
+    tooltip.style.left = `${nextX}px`;
+    tooltip.style.top = `${nextY}px`;
     tooltip.classList.add('visible');
   };
 
