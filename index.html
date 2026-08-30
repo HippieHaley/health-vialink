@@ -171,6 +171,8 @@
   }
 
   button {
+    --btn-color: var(--teal);
+    --btn-glow: rgba(0,245,255,0.58);
     font-family: 'VT323', monospace;
     font-size: 23px;
     font-weight: 400;
@@ -178,9 +180,9 @@
     border-radius: 14px;
     border: none;
     cursor: pointer;
-    background: var(--teal);
+    background: var(--btn-color);
     color: #000;
-    box-shadow: 0 0 18px rgba(0,245,255,0.58);
+    box-shadow: 0 0 18px var(--btn-glow);
     letter-spacing: 0.05em;
     text-transform: uppercase;
     transition: opacity 0.15s ease;
@@ -188,16 +190,20 @@
 
   button:hover { opacity: 0.96; }
   button.ghost {
-    background: #ff4fd8;
+    --btn-color: #ff4fd8;
+    --btn-glow: rgba(255, 79, 216, 0.62);
+    background: var(--btn-color);
     color: #000;
-    box-shadow: 0 0 18px rgba(255, 79, 216, 0.62);
+    box-shadow: 0 0 18px var(--btn-glow);
   }
 
   .action-btn {
-    background: var(--action-color, var(--teal));
+    --btn-color: var(--action-color, var(--teal));
+    --btn-glow: var(--action-glow, rgba(0,245,255,0.6));
+    background: var(--btn-color);
     color: #000;
     border: 0;
-    box-shadow: 0 0 14px var(--action-glow, rgba(0,245,255,0.6));
+    box-shadow: 0 0 14px var(--btn-glow);
     padding: 6px 10px;
     min-width: 64px;
     font-size: 17px;
@@ -213,37 +219,52 @@
   }
 
   .tab {
+    --btn-color: #bf7cff;
+    --btn-glow: rgba(191,124,255,0.38);
     padding: 10px 16px;
     font-size: 18px;
     border-radius: 999px;
-    background: #bf7cff;
+    background: var(--btn-color);
     color: #000;
     cursor: pointer;
     border: 0;
-    box-shadow: 0 0 16px rgba(191,124,255,0.38);
+    box-shadow: 0 0 16px var(--btn-glow);
     font-family: 'VT323', monospace;
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 
   .tab.active {
-    background: var(--teal);
+    --btn-color: var(--teal);
+    --btn-glow: rgba(0,245,255,0.66);
+    background: var(--btn-color);
     color: #000;
-    box-shadow: 0 0 18px rgba(0,245,255,0.66);
+    box-shadow: 0 0 18px var(--btn-glow);
   }
 
   .table-header-button {
-    background: transparent;
-    color: var(--ink);
+    --btn-color: #bf7cff;
+    --btn-glow: rgba(191,124,255,0.38);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    background: var(--btn-color);
+    color: #000;
     border: none;
-    padding: 0;
+    padding: 6px 10px;
+    border-radius: 999px;
     font-family: 'VT323', monospace;
     font-size: 18px;
     font-weight: 400;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     cursor: pointer;
+    box-shadow: 0 0 12px var(--btn-glow);
+    transition: opacity 0.15s ease;
   }
+
+  .table-header-button:hover { opacity: 0.96; }
 
   table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 16px; }
   th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); }
@@ -535,6 +556,41 @@ function hexToRgba(hex, alpha = 1) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+const NEON_ACTION_COLORS = ['#ff4fd8', '#00f5ff', '#7bff8a', '#ffe45e', '#bf7cff', '#ff7b7b', '#00ffae', '#ff9c00'];
+const TABLE_HEADER_COLORS = { med: {}, vital: {} };
+
+function getRandomNeonColor() {
+  const randomIndex = Math.floor(Math.random() * NEON_ACTION_COLORS.length);
+  return NEON_ACTION_COLORS[randomIndex];
+}
+
+function getStableColor(key, storage) {
+  if (!storage[key]) storage[key] = getRandomNeonColor();
+  return storage[key];
+}
+
+function applyNeonActionButtonStyle(button, color) {
+  const resolvedColor = color || button.dataset.actionColor || getRandomNeonColor();
+  button.dataset.actionColor = resolvedColor;
+  button.classList.add('action-btn');
+  button.style.setProperty('--action-color', resolvedColor);
+  button.style.setProperty('--action-glow', hexToRgba(resolvedColor, 0.8));
+  button.style.background = resolvedColor;
+  button.style.color = '#000';
+  button.style.boxShadow = `0 0 18px ${hexToRgba(resolvedColor, 0.8)}`;
+}
+
+function applyTableHeaderColor(button) {
+  const table = button.dataset.table;
+  const key = button.dataset.key;
+  const color = getStableColor(key, TABLE_HEADER_COLORS[table]);
+  button.dataset.headerColor = color;
+  button.style.setProperty('--btn-color', color);
+  button.style.setProperty('--btn-glow', hexToRgba(color, 0.38));
+  button.style.background = color;
+  button.style.boxShadow = `0 0 12px ${hexToRgba(color, 0.38)}`;
+}
+
 function parseDate(str) {
   const [y, m, d] = str.split('-').map(Number);
   return new Date(y, m - 1, d);
@@ -627,7 +683,7 @@ function getVitalSortValue(v, key) {
 
 function attachTableSortHandlers() {
   document.querySelectorAll('.table-header-button').forEach((button) => {
-    button.addEventListener('click', () => {
+    button.onclick = () => {
       const key = button.dataset.key;
       const table = button.dataset.table;
       if (table === 'med') {
@@ -646,7 +702,7 @@ function attachTableSortHandlers() {
         }
       }
       render();
-    });
+    };
   });
 }
 
@@ -672,14 +728,9 @@ function renderMedTable() {
         <button type="button" data-action="remove" data-i="${i}">Remove</button>
       </td>`;
 
-    const actionColor = cat ? resolveColor(cat.color) : '#00f5ff';
     tr.querySelectorAll('button').forEach((button) => {
-      button.classList.add('action-btn');
-      button.style.setProperty('--action-color', actionColor);
-      button.style.setProperty('--action-glow', hexToRgba(actionColor, 0.7));
-      button.style.background = actionColor;
-      button.style.color = '#000';
-      button.style.boxShadow = `0 0 18px ${hexToRgba(actionColor, 0.7)}`;
+      const color = m.actionColor || (m.actionColor = getRandomNeonColor());
+      applyNeonActionButtonStyle(button, color);
       button.addEventListener('click', () => {
         const action = button.dataset.action;
         if (action === 'remove') {
@@ -696,8 +747,11 @@ function renderMedTable() {
   });
 
   document.querySelectorAll('#medTable .table-header-button').forEach((button) => {
+    applyTableHeaderColor(button);
     const active = button.dataset.key === medTableState.key;
-    button.textContent = `${button.textContent.replace(/[ ↑↓]$/, '')}${active ? (medTableState.dir === 'asc' ? ' ↑' : ' ↓') : ''}`;
+    const baseLabel = button.dataset.label || button.textContent.replace(/[ ↑↓]$/, '');
+    button.dataset.label = baseLabel;
+    button.textContent = `${baseLabel}${active ? (medTableState.dir === 'asc' ? ' ↑' : ' ↓') : ''}`;
   });
 
   attachTableSortHandlers();
@@ -722,13 +776,8 @@ function renderVitalTable() {
       <td class="del"><button data-i="${i}">Remove</button></td>`;
 
     const removeBtn = tr.querySelector('button');
-    removeBtn.classList.add('action-btn');
-    const removeColor = '#585858';
-    removeBtn.style.setProperty('--action-color', removeColor);
-    removeBtn.style.setProperty('--action-glow', hexToRgba(removeColor, 0.6));
-    removeBtn.style.background = removeColor;
-    removeBtn.style.color = '#f5f5f5';
-    removeBtn.style.boxShadow = `0 0 16px ${hexToRgba(removeColor, 0.6)}`;
+    const color = v.actionColor || (v.actionColor = getRandomNeonColor());
+    applyNeonActionButtonStyle(removeBtn, color);
     removeBtn.addEventListener('click', () => {
       vitals.splice(i, 1);
       saveVitals();
@@ -739,8 +788,11 @@ function renderVitalTable() {
   });
 
   document.querySelectorAll('#vitalTable .table-header-button').forEach((button) => {
+    applyTableHeaderColor(button);
     const active = button.dataset.key === vitalTableState.key;
-    button.textContent = `${button.textContent.replace(/[ ↑↓]$/, '')}${active ? (vitalTableState.dir === 'asc' ? ' ↑' : ' ↓') : ''}`;
+    const baseLabel = button.dataset.label || button.textContent.replace(/[ ↑↓]$/, '');
+    button.dataset.label = baseLabel;
+    button.textContent = `${baseLabel}${active ? (vitalTableState.dir === 'asc' ? ' ↑' : ' ↓') : ''}`;
   });
 
   attachTableSortHandlers();
