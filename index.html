@@ -414,7 +414,11 @@
   <div class="panel">
     <div class="tabs">
       <div class="tab active" data-tab="med">Medications</div>
-      <div class="tab" data-tab="vital">Weight &amp; BP</div>
+      <div class="tab" data-tab="weight">Weight</div>
+      <div class="tab" data-tab="bp">Blood Pressure</div>
+      <div class="tab" data-tab="pulse">Pulse</div>
+      <div class="tab" data-tab="temp">Temp</div>
+      <div class="tab" data-tab="resp">Respirations</div>
     </div>
 
     <div id="tab-med">
@@ -454,30 +458,137 @@
       <div class="empty" id="medEmpty" style="display:none;">No medications added yet.</div>
     </div>
 
-    <div id="tab-vital" style="display:none;">
-      <form class="entry" id="vitalForm">
+    <div id="tab-weight" style="display:none;">
+      <form class="entry" id="weightForm">
         <div class="field">
           <label class="f">Date</label>
-          <input id="vitalDate" type="date" required>
+          <input id="weightDate" type="date" required>
         </div>
-        <div class="field">
+        <div class="field grow">
           <label class="f">Weight (lb)</label>
-          <input id="vitalWeight" type="number" step="0.1" placeholder="165">
+          <input id="weightValue" type="number" step="0.1" placeholder="165" required>
         </div>
-        <div class="field">
-          <label class="f">Systolic BP</label>
-          <input id="vitalSys" type="number" placeholder="120">
-        </div>
-        <div class="field">
-          <label class="f">Diastolic BP</label>
-          <input id="vitalDia" type="number" placeholder="80">
-        </div>
-        <div class="field">
-          <label class="f">Temp (°F)</label>
-          <input id="vitalTemp" type="number" step="0.1" placeholder="98.6">
-        </div>
-        <button type="submit">Add reading</button>
+        <button type="submit">Add weight</button>
       </form>
+      <table id="weightTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Weight</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="weightEmpty" style="display:none;">No weight readings added yet.</div>
+    </div>
+
+    <div id="tab-bp" style="display:none;">
+      <form class="entry" id="bpForm">
+        <div class="field">
+          <label class="f">Date</label>
+          <input id="bpDate" type="date" required>
+        </div>
+        <div class="field">
+          <label class="f">Systolic</label>
+          <input id="bpSys" type="number" placeholder="120" required>
+        </div>
+        <div class="field">
+          <label class="f">Diastolic</label>
+          <input id="bpDia" type="number" placeholder="80" required>
+        </div>
+        <button type="submit">Add BP</button>
+      </form>
+      <table id="bpTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Systolic</th>
+            <th>Diastolic</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="bpEmpty" style="display:none;">No blood pressure readings added yet.</div>
+    </div>
+
+    <div id="tab-pulse" style="display:none;">
+      <form class="entry" id="pulseForm">
+        <div class="field">
+          <label class="f">Date</label>
+          <input id="pulseDate" type="date" required>
+        </div>
+        <div class="field grow">
+          <label class="f">Pulse</label>
+          <input id="pulseValue" type="number" placeholder="72" required>
+        </div>
+        <button type="submit">Add pulse</button>
+      </form>
+      <table id="pulseTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Pulse</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="pulseEmpty" style="display:none;">No pulse readings added yet.</div>
+    </div>
+
+    <div id="tab-temp" style="display:none;">
+      <form class="entry" id="tempForm">
+        <div class="field">
+          <label class="f">Date</label>
+          <input id="tempDate" type="date" required>
+        </div>
+        <div class="field grow">
+          <label class="f">Temperature (°F)</label>
+          <input id="tempValue" type="number" step="0.1" placeholder="98.6" required>
+        </div>
+        <button type="submit">Add temp</button>
+      </form>
+      <table id="tempTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Temp</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="tempEmpty" style="display:none;">No temperature readings added yet.</div>
+    </div>
+
+    <div id="tab-resp" style="display:none;">
+      <form class="entry" id="respForm">
+        <div class="field">
+          <label class="f">Date</label>
+          <input id="respDate" type="date" required>
+        </div>
+        <div class="field grow">
+          <label class="f">Respirations</label>
+          <input id="respValue" type="number" placeholder="16" required>
+        </div>
+        <button type="submit">Add respiration</button>
+      </form>
+      <table id="respTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Respirations</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="respEmpty" style="display:none;">No respiration readings added yet.</div>
+    </div>
+
+    <div id="tab-vital" style="display:none;">
       <table id="vitalTable">
         <thead>
           <tr>
@@ -493,7 +604,7 @@
         </thead>
         <tbody></tbody>
       </table>
-      <div class="empty" id="vitalEmpty" style="display:none;">No readings added yet. Switch to this tab and add your weight/BP data to layer it on the chart.</div>
+      <div class="empty" id="vitalEmpty" style="display:none;">No readings added yet. Add a reading from one of the tabs above to layer it on the chart.</div>
     </div>
   </div>
 
@@ -1042,6 +1153,7 @@ function render() {
   renderLayerToggles();
   renderMedForm();
   renderMedTable();
+  renderMetricTables();
   renderVitalTable();
   syncChartRangeInputs();
   renderChart();
@@ -1197,6 +1309,93 @@ function renderMedTable() {
   });
 
   attachTableSortHandlers();
+}
+
+function renderMetricTable(tableId, metricKey, emptyId, valueFormatter) {
+  const table = document.querySelector(tableId);
+  const empty = document.getElementById(emptyId);
+  if (!table || !empty) return;
+
+  const tbody = table.querySelector('tbody');
+  tbody.innerHTML = '';
+
+  const entries = vitals
+    .map((entry, index) => ({ entry, index }))
+    .filter(({ entry }) => entry[metricKey] != null && entry[metricKey] !== '')
+    .sort((a, b) => parseDate(a.entry.date) - parseDate(b.entry.date));
+
+  if (!entries.length) {
+    empty.style.display = 'block';
+    table.style.display = 'none';
+    return;
+  }
+
+  empty.style.display = 'none';
+  table.style.display = 'table';
+
+  entries.forEach(({ entry, index }) => {
+    const tr = document.createElement('tr');
+    const value = valueFormatter ? valueFormatter(entry[metricKey]) : entry[metricKey];
+    tr.innerHTML = `<td>${entry.date}</td><td>${value}</td><td class="del"><button data-index="${index}">Remove</button></td>`;
+
+    const removeBtn = tr.querySelector('button');
+    const color = entry.actionColor || (entry.actionColor = getRandomNeonColor());
+    applyNeonActionButtonStyle(removeBtn, color);
+    removeBtn.addEventListener('click', () => {
+      vitals.splice(index, 1);
+      saveVitals();
+      render();
+    });
+
+    tbody.appendChild(tr);
+  });
+}
+
+function renderBpTable() {
+  const table = document.querySelector('#bpTable');
+  const empty = document.getElementById('bpEmpty');
+  if (!table || !empty) return;
+
+  const tbody = table.querySelector('tbody');
+  tbody.innerHTML = '';
+
+  const entries = vitals
+    .map((entry, index) => ({ entry, index }))
+    .filter(({ entry }) => (entry.sys != null && entry.sys !== '') || (entry.dia != null && entry.dia !== ''))
+    .sort((a, b) => parseDate(a.entry.date) - parseDate(b.entry.date));
+
+  if (!entries.length) {
+    empty.style.display = 'block';
+    table.style.display = 'none';
+    return;
+  }
+
+  empty.style.display = 'none';
+  table.style.display = 'table';
+
+  entries.forEach(({ entry, index }) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${entry.date}</td><td>${entry.sys ?? '—'}</td><td>${entry.dia ?? '—'}</td><td class="del"><button data-index="${index}">Remove</button></td>`;
+
+    const removeBtn = tr.querySelector('button');
+    const color = entry.actionColor || (entry.actionColor = getRandomNeonColor());
+    applyNeonActionButtonStyle(removeBtn, color);
+    removeBtn.addEventListener('click', () => {
+      vitals.splice(index, 1);
+      saveVitals();
+      render();
+    });
+
+    tbody.appendChild(tr);
+  });
+}
+
+function renderMetricTables() {
+  renderMetricTable('#weightTable', 'weight', 'weightEmpty', (value) => `${value} lb`);
+  renderBpTable();
+  renderMetricTable('#pulseTable', 'pulse', 'pulseEmpty', (value) => `${value}`);
+  renderMetricTable('#tempTable', 'temp', 'tempEmpty', (value) => `${value}°F`);
+  renderMetricTable('#respTable', 'respirations', 'respEmpty', (value) => `${value}`);
 }
 
 function renderVitalTable() {
@@ -1652,28 +1851,56 @@ medForm.addEventListener('submit', (e) => {
 
 document.getElementById('medCancelEdit').addEventListener('click', resetMedForm);
 
-document.getElementById('vitalForm').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const date = document.getElementById('vitalDate').value;
-  const weight = document.getElementById('vitalWeight').value;
-  const sys = document.getElementById('vitalSys').value;
-  const dia = document.getElementById('vitalDia').value;
-  const pulse = document.getElementById('vitalPulse').value;
-  const temp = document.getElementById('vitalTemp').value;
+function saveVitalEntry(date, values) {
   if (!date) return;
-
-  vitals.push({
-    date,
-    weight: weight === '' ? null : Number(weight),
-    sys: sys === '' ? null : Number(sys),
-    dia: dia === '' ? null : Number(dia),
-    pulse: pulse === '' ? null : Number(pulse),
-    temp: temp === '' ? null : Number(temp)
-  });
-
+  const entry = { date, ...values };
+  vitals.push(entry);
   saveVitals();
-  document.getElementById('vitalForm').reset();
   render();
+}
+
+document.getElementById('weightForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const date = document.getElementById('weightDate').value;
+  const value = document.getElementById('weightValue').value;
+  saveVitalEntry(date, { weight: value === '' ? null : Number(value) });
+  e.target.reset();
+});
+
+document.getElementById('bpForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const date = document.getElementById('bpDate').value;
+  const sys = document.getElementById('bpSys').value;
+  const dia = document.getElementById('bpDia').value;
+  saveVitalEntry(date, {
+    sys: sys === '' ? null : Number(sys),
+    dia: dia === '' ? null : Number(dia)
+  });
+  e.target.reset();
+});
+
+document.getElementById('pulseForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const date = document.getElementById('pulseDate').value;
+  const value = document.getElementById('pulseValue').value;
+  saveVitalEntry(date, { pulse: value === '' ? null : Number(value) });
+  e.target.reset();
+});
+
+document.getElementById('tempForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const date = document.getElementById('tempDate').value;
+  const value = document.getElementById('tempValue').value;
+  saveVitalEntry(date, { temp: value === '' ? null : Number(value) });
+  e.target.reset();
+});
+
+document.getElementById('respForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const date = document.getElementById('respDate').value;
+  const value = document.getElementById('respValue').value;
+  saveVitalEntry(date, { respirations: value === '' ? null : Number(value) });
+  e.target.reset();
 });
 
 document.querySelectorAll('.tab').forEach((tab) => {
@@ -1681,7 +1908,12 @@ document.querySelectorAll('.tab').forEach((tab) => {
     const target = tab.dataset.tab;
     document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === tab));
     document.getElementById('tab-med').style.display = target === 'med' ? 'block' : 'none';
-    document.getElementById('tab-vital').style.display = target === 'vital' ? 'block' : 'none';
+    document.getElementById('tab-weight').style.display = target === 'weight' ? 'block' : 'none';
+    document.getElementById('tab-bp').style.display = target === 'bp' ? 'block' : 'none';
+    document.getElementById('tab-pulse').style.display = target === 'pulse' ? 'block' : 'none';
+    document.getElementById('tab-temp').style.display = target === 'temp' ? 'block' : 'none';
+    document.getElementById('tab-resp').style.display = target === 'resp' ? 'block' : 'none';
+    document.getElementById('tab-vital').style.display = 'none';
   });
 });
 
