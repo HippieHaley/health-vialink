@@ -109,11 +109,42 @@
     padding-bottom: 6px;
   }
 
+  .chart-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+  }
+
   svg {
     width: 100%;
     min-width: 1200px;
     height: auto;
     display: block;
+  }
+
+  #chart-tooltip {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform: translate(-50%, -120%);
+    pointer-events: none;
+    background: rgba(10, 10, 10, 0.92);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 10px;
+    padding: 4px 8px;
+    font-family: 'VT323', monospace;
+    font-size: 15px;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity 0.12s ease;
+    white-space: nowrap;
+    box-shadow: 0 0 12px rgba(0,245,255,0.18);
+  }
+
+  #chart-tooltip.visible {
+    opacity: 1;
   }
 
   .cat-label {
@@ -281,7 +312,10 @@
     <h2>Layers</h2>
     <div class="layers" id="layerToggles"></div>
     <div class="chart-scroll">
-      <svg id="chart" viewBox="0 0 1200 480" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="chart-wrapper">
+        <svg id="chart" viewBox="0 0 1200 480" preserveAspectRatio="xMidYMid meet"></svg>
+        <div id="chart-tooltip">Hover date</div>
+      </div>
     </div>
   </div>
 
@@ -796,6 +830,40 @@ function renderVitalTable() {
   attachTableSortHandlers();
 }
 
+function formatApproxDateFromX(x, yearMin, yearMax, marginLeft, plotW) {
+  const safeX = Math.min(Math.max(x, marginLeft), marginLeft + plotW);
+  const ratio = (safeX - marginLeft) / plotW;
+  const yearFloat = yearMin + ratio * (yearMax - yearMin);
+  const year = Math.floor(yearFloat);
+  const monthIndex = Math.min(11, Math.max(0, Math.round((yearFloat - year) * 12)));
+  const date = new Date(year, monthIndex, 1);
+  return new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(date);
+}
+
+function attachChartHoverTracking() {
+  const svg = document.getElementById('chart');
+  const tooltip = document.getElementById('chart-tooltip');
+  if (!svg || !tooltip) return;
+
+  const updateTooltip = (event) => {
+    const rect = svg.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const yearMin = Number(svg.dataset.yearMin || 2020);
+    const yearMax = Number(svg.dataset.yearMax || 2026);
+    const marginLeft = Number(svg.dataset.marginLeft || 170);
+    const plotW = Number(svg.dataset.plotW || 820);
+    const approxDate = formatApproxDateFromX(x, yearMin, yearMax, marginLeft, plotW);
+
+    tooltip.textContent = approxDate;
+    tooltip.style.left = `${Math.min(Math.max(x, marginLeft), marginLeft + plotW)}px`;
+    tooltip.style.top = `${Math.max(18, event.clientY - rect.top - 6)}px`;
+    tooltip.classList.add('visible');
+  };
+
+  svg.onmousemove = updateTooltip;
+  svg.onmouseleave = () => tooltip.classList.remove('visible');
+}
+
 function renderChart() {
   const svg = document.getElementById('chart');
   svg.innerHTML = '';
@@ -804,6 +872,10 @@ function renderChart() {
   const marginLeft = 170, marginRight = 60, marginTop = 20, marginBottom = 40;
   const plotW = W - marginLeft - marginRight;
   const plotTop = marginTop;
+  svg.dataset.yearMin = String(0);
+  svg.dataset.yearMax = String(0);
+  svg.dataset.marginLeft = String(marginLeft);
+  svg.dataset.plotW = String(plotW);
 
   let years = [];
   meds.forEach(m => { years.push(toDecimalYear(m.start)); years.push(toDecimalYear(m.end || TODAY)); });
@@ -815,6 +887,11 @@ function renderChart() {
   if (yearMax - yearMin < 3) {
     yearMax = yearMin + 3;
   }
+
+  svg.dataset.yearMin = String(yearMin);
+  svg.dataset.yearMax = String(yearMax);
+  svg.dataset.marginLeft = String(marginLeft);
+  svg.dataset.plotW = String(plotW);
 
   const xScale = (yr) => marginLeft + ((yr - yearMin) / (yearMax - yearMin)) * plotW;
   const laneHeight = 24, laneGap = 5, catGap = 16;
@@ -953,6 +1030,8 @@ function renderChart() {
   if (layerState.diastolic) {
     drawLine('dia', resolveColor('var(--diastolic)'), 'Diastolic');
   }
+
+  attachChartHoverTracking();
 }
 
 const medForm = document.getElementById('medForm');
