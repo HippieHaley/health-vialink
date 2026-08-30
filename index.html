@@ -511,9 +511,10 @@ function renderChart() {
     m._colorIndex = index;
   });
 
+  const visibleCategories = categories.filter(cat => layerState[cat.id] !== false);
   const catLayout = {};
   let yCursor = plotTop;
-  categories.forEach(cat => {
+  visibleCategories.forEach(cat => {
     const catMeds = meds.filter(m => m.categoryId === cat.id).sort((a,b) => parseDate(a.start) - parseDate(b.start));
     const lanesEnd = [];
     catMeds.forEach(m => {
@@ -548,9 +549,23 @@ function renderChart() {
     svg.appendChild(el('text', { x: x, y: overlayBottom + 18, class: 'year-label', 'text-anchor': 'middle' }, y));
   }
 
+  const visibleLayoutOrder = visibleCategories.map(cat => catLayout[cat.id]);
+
   categories.forEach(cat => {
     if (layerState[cat.id] === false) return;
     const layout = catLayout[cat.id];
+    const bandFill = resolveColor(cat.color);
+    const orderIndex = visibleLayoutOrder.indexOf(layout);
+    const nextTop = orderIndex === visibleLayoutOrder.length - 1 ? overlayBottom : visibleLayoutOrder[orderIndex + 1].top;
+    svg.appendChild(el('rect', {
+      x: marginLeft,
+      y: layout.top - 4,
+      width: plotW,
+      height: Math.max(nextTop - layout.top + 4, 18),
+      fill: bandFill,
+      opacity: 0.08,
+      rx: 10
+    }));
     svg.appendChild(el('text', { x: 8, y: layout.top + 15, class: 'cat-label' }, cat.name));
 
     layout.meds.forEach(m => {
