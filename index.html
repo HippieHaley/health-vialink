@@ -574,7 +574,14 @@ function renderChart() {
       const x2 = xScale(toDecimalYear(m.end || TODAY));
       const y = layout.top + 6 + m._lane * (laneHeight + laneGap);
       const w = Math.max(x2 - x1, 3);
-appendChild(rect);
+      const rect = el('rect', {
+        x: x1, y: y, width: w, height: laneHeight, rx: 5,
+        fill: color, opacity: m.uncertain ? 0.35 : 0.88,
+        'stroke-dasharray': m.uncertain ? '5,3' : 'none',
+        stroke: m.uncertain ? color : 'none',
+        'stroke-width': m.uncertain ? 1.5 : 0
+      });
+      svg.appendChild(rect);
       rect.appendChild(el('title', {}, `${m.name} (${m.start} to ${m.end === TODAY ? 'present' : m.end})${m.uncertain ? ' - unconfirmed' : ''}`));
       if (w > 55) {
         svg.appendChild(el('text', {
