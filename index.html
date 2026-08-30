@@ -121,10 +121,47 @@
 
   .chart-toolbar {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
     margin-bottom: 8px;
     position: relative;
     z-index: 1;
+  }
+
+  .chart-range-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--ink);
+    font-family: 'VT323', monospace;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .chart-range-controls input {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    color: var(--ink);
+    padding: 6px 8px;
+    min-width: 120px;
+  }
+
+  .chart-range-controls button {
+    background: var(--teal);
+    color: #000;
+    border: none;
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-family: 'VT323', monospace;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 0 12px rgba(110, 227, 123, 0.42);
   }
 
   .tooltip-toggle {
@@ -147,7 +184,7 @@
 
   svg {
     width: 100%;
-    min-width: 1200px;
+    min-width: 1400px;
     height: auto;
     display: block;
   }
@@ -354,6 +391,12 @@
     <h2>Layers</h2>
     <div class="layers" id="layerToggles"></div>
     <div class="chart-toolbar">
+      <div class="chart-range-controls">
+        <label>From <input type="date" id="chartStartDate"></label>
+        <label>To <input type="date" id="chartEndDate"></label>
+        <button type="button" id="applyChartRange">Apply</button>
+        <button type="button" id="resetChartRange" style="background:#bf7cff; box-shadow:0 0 12px rgba(191,124,255,0.42);">Reset</button>
+      </div>
       <label class="tooltip-toggle">
         <input type="checkbox" id="showAllTooltipInfo">
         <span>Show all info</span>
@@ -603,16 +646,50 @@ const DEFAULT_PULSE_VITALS = [
   { date: '2022-02-16', pulse: 74 },
   { date: '2022-01-19', pulse: 90 },
   { date: '2021-07-29', pulse: 78 },
-  { date: '2021-03-18', pulse: 82, time: '4:42 PM' },
-  { date: '2021-03-18', pulse: 77, time: '5:00 PM' },
-  { date: '2021-03-18', pulse: 99, time: '5:30 PM' },
-  { date: '2021-03-18', pulse: 88, time: '6:00 PM' },
-  { date: '2021-03-18', pulse: 67, time: '6:55 PM' },
-  { date: '2021-03-18', pulse: 72, time: '7:00 PM' },
-  { date: '2021-03-18', pulse: 70, time: '7:30 PM' },
-  { date: '2021-03-18', pulse: 84, time: '7:45 PM' },
-  { date: '2021-03-18', pulse: 77, time: '8:00 PM' },
-  { date: '2021-03-18', pulse: 98, time: '8:15 PM' }
+  { date: '2021-03-18', pulse: 98, time: '4:42 PM' },
+  { date: '2021-03-18', pulse: 116, time: '5:00 PM' },
+  { date: '2021-03-18', pulse: 82, time: '5:30 PM' },
+  { date: '2020-12-17', pulse: 72, time: '9:57 AM' },
+  { date: '2020-09-17', pulse: 61, time: '9:45 AM' },
+  { date: '2020-09-09', pulse: 79, time: '9:56 AM' },
+  { date: '2020-07-14', pulse: 70, time: '9:19 AM' },
+  { date: '2020-06-10', pulse: 84, time: '8:36 AM' },
+  { date: '2020-06-03', pulse: 93, time: '4:49 PM' },
+  { date: '2020-06-03', pulse: 94, time: '5:03 PM' },
+  { date: '2020-06-03', pulse: 66, time: '6:30 PM' },
+  { date: '2020-05-18', pulse: 107, time: '1:12 PM' },
+  { date: '2020-04-26', pulse: 93, time: '9:43 AM' },
+  { date: '2020-04-15', pulse: 98, time: '8:34 AM' },
+  { date: '2020-04-08', pulse: 95, time: '7:23 AM' },
+  { date: '2020-01-24', pulse: 80, time: '6:14 PM' },
+  { date: '2019-12-17', pulse: 76, time: '2:51 PM' },
+  { date: '2019-10-29', pulse: 92, time: '4:06 PM' },
+  { date: '2019-10-22', pulse: 67, time: '4:49 PM' },
+  { date: '2019-06-18', pulse: 70, time: '3:43 PM' },
+  { date: '2019-05-14', pulse: 81, time: '6:36 PM' },
+  { date: '2019-04-18', pulse: 88, time: '5:33 PM' },
+  { date: '2019-02-04', pulse: 87, time: '1:42 AM' },
+  { date: '2018-12-05', pulse: 95, time: '11:18 AM' },
+  { date: '2018-10-24', pulse: 86, time: '12:13 PM' },
+  { date: '2018-10-04', pulse: 85, time: '3:42 PM' },
+  { date: '2018-02-02', pulse: 74, time: '2:23 PM' },
+  { date: '2018-01-18', pulse: 78, time: '11:27 AM' },
+  { date: '2017-12-08', pulse: 75, time: '10:45 AM' },
+  { date: '2017-11-08', pulse: 56, time: '3:08 PM' },
+  { date: '2017-03-09', pulse: 64, time: '12:01 PM' },
+  { date: '2017-02-08', pulse: 78, time: '11:18 AM' },
+  { date: '2016-12-21', pulse: 76, time: '5:54 PM' },
+  { date: '2016-12-15', pulse: 81, time: '11:08 AM' },
+  { date: '2016-12-05', pulse: 80, time: '4:35 PM' },
+  { date: '2016-11-30', pulse: 72, time: '3:22 PM' },
+  { date: '2016-11-21', pulse: 78, time: '2:26 PM' },
+  { date: '2016-11-15', pulse: 83, time: '10:52 AM' },
+  { date: '2016-11-10', pulse: 67, time: '6:27 PM' },
+  { date: '2016-08-16', pulse: 77, time: '1:37 PM' },
+  { date: '2016-04-19', pulse: 100, time: '5:26 PM' },
+  { date: '2016-03-01', pulse: 80, time: '12:11 PM' },
+  { date: '2016-02-24', pulse: 72, time: '6:05 PM' },
+  { date: '2016-01-15', pulse: 68, time: '1:39 PM' }
 ];
 
 const VITALS_SEED_VERSION = 2;
@@ -620,7 +697,14 @@ let meds = [];
 let vitals = [];
 let medTableState = { key: 'start', dir: 'asc' };
 let vitalTableState = { key: 'date', dir: 'asc' };
+let chartRange = { start: '', end: '' };
 let layerState = { ssri: true, sleep: true, adhd: true, weight: false, systolic: false, diastolic: false, pulse: true };
+
+function getChartRangeDates() {
+  const start = chartRange.start ? parseDate(chartRange.start) : null;
+  const end = chartRange.end ? parseDate(chartRange.end) : null;
+  return { start, end };
+}
 
 async function loadAll() {
   let hasStoredMeds = false;
@@ -744,11 +828,49 @@ function scrollChartToEnd() {
   });
 }
 
+function getChartDateBounds() {
+  const allDates = [];
+  meds.forEach((m) => {
+    allDates.push(m.start);
+    if (m.end) allDates.push(m.end);
+  });
+  vitals.forEach((v) => allDates.push(v.date));
+
+  if (!allDates.length) return { min: '2016-01-01', max: '2026-12-31' };
+
+  const validDates = allDates.filter(Boolean).map((d) => new Date(`${d}T00:00:00`));
+  const min = new Date(Math.min(...validDates.map((d) => d.getTime())));
+  const max = new Date(Math.max(...validDates.map((d) => d.getTime())));
+
+  return {
+    min: min.toISOString().slice(0, 10),
+    max: max.toISOString().slice(0, 10)
+  };
+}
+
+function syncChartRangeInputs() {
+  const bounds = getChartDateBounds();
+  const startEl = document.getElementById('chartStartDate');
+  const endEl = document.getElementById('chartEndDate');
+  if (!startEl || !endEl) return;
+
+  if (!chartRange.start) chartRange.start = bounds.min;
+  if (!chartRange.end) chartRange.end = bounds.max;
+
+  startEl.value = chartRange.start;
+  endEl.value = chartRange.end;
+  startEl.min = bounds.min;
+  startEl.max = bounds.max;
+  endEl.min = bounds.min;
+  endEl.max = bounds.max;
+}
+
 function render() {
   renderLayerToggles();
   renderMedForm();
   renderMedTable();
   renderVitalTable();
+  syncChartRangeInputs();
   renderChart();
   scrollChartToEnd();
 }
@@ -955,17 +1077,62 @@ function formatApproxDateFromX(x, yearMin, yearMax, marginLeft, plotW) {
   };
 }
 
+function getAverageMetricValue(entries, metricKey) {
+  const values = entries
+    .map((entry) => Number(entry[metricKey]))
+    .filter((value) => Number.isFinite(value));
+
+  if (!values.length) return null;
+  if (values.length === 1) return values[0];
+
+  const avg = values.reduce((sum, value) => sum + value, 0) / values.length;
+  const filtered = values.filter((value) => Math.abs(value - avg) <= Math.max(25, avg * 0.35));
+  const safeValues = filtered.length ? filtered : values;
+  return safeValues.reduce((sum, value) => sum + value, 0) / safeValues.length;
+}
+
+function getNormalizedVitalPoints(metricKey) {
+  const grouped = new Map();
+
+  vitals.forEach((entry) => {
+    if (entry[metricKey] == null || entry[metricKey] === '') return;
+    const dateKey = entry.date;
+    if (!grouped.has(dateKey)) grouped.set(dateKey, []);
+    grouped.get(dateKey).push(entry);
+  });
+
+  return [...grouped.entries()]
+    .map(([date, entries]) => ({
+      date,
+      value: getAverageMetricValue(entries, metricKey)
+    }))
+    .filter((point) => point.value != null)
+    .sort((a, b) => parseDate(a.date) - parseDate(b.date));
+}
+
 function getClosestVitalSnapshot(dateObj) {
-  let closest = null;
+  if (!vitals.length) return null;
+
+  const uniqueDates = [...new Set(vitals.map((v) => v.date))];
+  let closestDate = uniqueDates[0];
   let bestDiff = Infinity;
-  vitals.forEach((v) => {
-    const diff = Math.abs(parseDate(v.date) - dateObj);
+
+  uniqueDates.forEach((date) => {
+    const diff = Math.abs(parseDate(date) - dateObj);
     if (diff < bestDiff) {
       bestDiff = diff;
-      closest = v;
+      closestDate = date;
     }
   });
-  return closest;
+
+  const matches = vitals.filter((v) => v.date === closestDate);
+  return {
+    date: closestDate,
+    weight: getAverageMetricValue(matches, 'weight'),
+    sys: getAverageMetricValue(matches, 'sys'),
+    dia: getAverageMetricValue(matches, 'dia'),
+    pulse: getAverageMetricValue(matches, 'pulse')
+  };
 }
 
 function getActiveMedsSnapshot(dateObj, showAll = false) {
@@ -1051,8 +1218,10 @@ function attachChartHoverTracking() {
 
 function renderChart() {
   const svg = document.getElementById('chart');
+  if (!svg) return;
   svg.innerHTML = '';
 
+  const { start: rangeStart, end: rangeEnd } = getChartRangeDates();
   const W = 980, H = 480;
   const marginLeft = 170, marginRight = 60, marginTop = 20, marginBottom = 40;
   const plotW = W - marginLeft - marginRight;
@@ -1109,8 +1278,18 @@ function renderChart() {
   const catLayout = {};
   let yCursor = plotTop;
 
+  const visibleMeds = meds.filter((m) => {
+    const s = parseDate(m.start);
+    const e = parseDate(m.end || TODAY);
+    return (!rangeStart || e >= rangeStart) && (!rangeEnd || s <= rangeEnd);
+  });
+  const visibleVitals = vitals.filter((v) => {
+    const d = parseDate(v.date);
+    return (!rangeStart || d >= rangeStart) && (!rangeEnd || d <= rangeEnd);
+  });
+
   visibleCategories.forEach(cat => {
-    const catMeds = meds.filter(m => m.categoryId === cat.id).sort((a,b) => parseDate(a.start) - parseDate(b.start));
+    const catMeds = visibleMeds.filter(m => m.categoryId === cat.id).sort((a,b) => parseDate(a.start) - parseDate(b.start));
     const lanesEnd = [];
     catMeds.forEach(m => {
       const s = toDecimalYear(m.start), e = toDecimalYear(m.end || TODAY);
@@ -1212,16 +1391,15 @@ function renderChart() {
     });
   });
 
-  const sortedVitals = [...vitals].sort((a, b) => parseDate(a.date) - parseDate(b.date));
   function drawLine(key, color, label) {
-    const pts = sortedVitals.filter(v => v[key] !== undefined && v[key] !== null && v[key] !== '');
+    const pts = getNormalizedVitalPoints(key);
     if (pts.length === 0) return;
-    const vals = pts.map(p => Number(p[key]));
+    const vals = pts.map((p) => Number(p.value));
     let vMin = Math.min(...vals), vMax = Math.max(...vals);
     if (vMax === vMin) vMax += 1;
     const ptsSvg = pts.map((p) => {
       const x = xScale(toDecimalYear(p.date));
-      const y = marginTop + ((vMax - Number(p[key])) / (vMax - vMin)) * (overlayBottom - marginTop - 10);
+      const y = marginTop + ((vMax - Number(p.value)) / (vMax - vMin)) * (overlayBottom - marginTop - 10);
       return `${x},${y}`;
     }).join(' ');
     svg.appendChild(el('polyline', {
@@ -1236,7 +1414,7 @@ function renderChart() {
     if (pts.length > 0) {
       const last = pts[pts.length - 1];
       const x = xScale(toDecimalYear(last.date));
-      const y = marginTop + ((vMax - Number(last[key])) / (vMax - vMin)) * (overlayBottom - marginTop - 10);
+      const y = marginTop + ((vMax - Number(last.value)) / (vMax - vMin)) * (overlayBottom - marginTop - 10);
       svg.appendChild(el('circle', { cx: x, cy: y, r: 4, fill: color }));
     }
   }
@@ -1313,6 +1491,34 @@ document.querySelectorAll('.tab').forEach((tab) => {
     document.getElementById('tab-med').style.display = target === 'med' ? 'block' : 'none';
     document.getElementById('tab-vital').style.display = target === 'vital' ? 'block' : 'none';
   });
+});
+
+document.getElementById('applyChartRange').addEventListener('click', () => {
+  const startEl = document.getElementById('chartStartDate');
+  const endEl = document.getElementById('chartEndDate');
+  if (!startEl || !endEl) return;
+
+  const nextStart = startEl.value || '';
+  const nextEnd = endEl.value || '';
+  if (nextStart && nextEnd && nextStart > nextEnd) {
+    chartRange.start = nextEnd;
+    chartRange.end = nextStart;
+  } else {
+    chartRange.start = nextStart;
+    chartRange.end = nextEnd;
+  }
+
+  renderChart();
+  scrollChartToEnd();
+});
+
+document.getElementById('resetChartRange').addEventListener('click', () => {
+  const bounds = getChartDateBounds();
+  chartRange.start = bounds.min;
+  chartRange.end = bounds.max;
+  syncChartRangeInputs();
+  renderChart();
+  scrollChartToEnd();
 });
 
 document.getElementById('clearAll').addEventListener('click', () => {
