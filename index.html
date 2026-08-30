@@ -21,7 +21,7 @@
     --systolic: #ff8800;
     --diastolic: #ee0707;
     --pulse: #003524;
-    --temp: #86efac;
+    --temp: #5bfac0;
     --radius: 18px;
     --shadow: rgba(0, 0, 0, 0);
   }
@@ -487,6 +487,7 @@
             <th><button type="button" class="table-header-button" data-table="vital" data-key="dia">Diastolic</button></th>
             <th><button type="button" class="table-header-button" data-table="vital" data-key="pulse">Pulse</button></th>
             <th><button type="button" class="table-header-button" data-table="vital" data-key="temp">Temp</button></th>
+            <th><button type="button" class="table-header-button" data-table="vital" data-key="respirations">Respirations</button></th>
             <th></th>
           </tr>
         </thead>
@@ -746,13 +747,64 @@ const DEFAULT_TEMP_VITALS = [
   { date: '2018-01-18', temp: 99.1, time: '11:27 AM' }
 ];
 
+const DEFAULT_RESPIRATIONS_VITALS = [
+  { date: '2026-07-23', respirations: 16, time: '5:31 PM' },
+  { date: '2026-02-11', respirations: 18, time: '1:50 PM' },
+  { date: '2026-01-27', respirations: 16, time: '11:12 AM' },
+  { date: '2026-01-08', respirations: 18, time: '6:48 PM' },
+  { date: '2026-01-08', respirations: 18, time: '5:12 PM' },
+  { date: '2025-08-29', respirations: 18, time: '4:38 PM' },
+  { date: '2025-07-21', respirations: 16, time: '2:33 PM' },
+  { date: '2025-07-10', respirations: 18, time: '2:02 PM' },
+  { date: '2024-12-30', respirations: 20, time: '3:17 PM' },
+  { date: '2024-03-17', respirations: 18, time: '5:54 PM' },
+  { date: '2023-11-21', respirations: 20, time: '1:01 PM' },
+  { date: '2023-07-21', respirations: 16, time: '12:29 PM' },
+  { date: '2023-07-18', respirations: 16, time: '7:19 AM' },
+  { date: '2023-05-31', respirations: 16, time: '10:40 AM' },
+  { date: '2023-05-31', respirations: 14, time: '10:30 AM' },
+  { date: '2023-05-31', respirations: 16, time: '10:20 AM' },
+  { date: '2023-05-31', respirations: 16, time: '10:15 AM' },
+  { date: '2023-05-31', respirations: 16, time: '10:10 AM' },
+  { date: '2023-05-31', respirations: 17, time: '9:55 AM' },
+  { date: '2023-05-31', respirations: 20, time: '9:50 AM' },
+  { date: '2023-05-31', respirations: 20, time: '9:31 AM' },
+  { date: '2022-07-07', respirations: 18, time: '2:49 PM' },
+  { date: '2022-06-16', respirations: 16, time: '3:07 PM' },
+  { date: '2022-02-16', respirations: 20, time: '3:53 PM' },
+  { date: '2022-01-19', respirations: 18, time: '3:38 PM' },
+  { date: '2021-03-18', respirations: 16, time: '4:42 PM' },
+  { date: '2020-12-17', respirations: 16, time: '9:57 AM' },
+  { date: '2020-06-03', respirations: 16, time: '5:03 PM' },
+  { date: '2020-06-03', respirations: 17, time: '4:49 PM' },
+  { date: '2020-04-26', respirations: 16, time: '9:43 AM' },
+  { date: '2020-01-24', respirations: 16, time: '6:14 PM' },
+  { date: '2019-12-17', respirations: 16, time: '2:51 PM' },
+  { date: '2019-10-04', respirations: 16, time: '5:20 PM' },
+  { date: '2019-02-04', respirations: 24, time: '1:42 AM' },
+  { date: '2018-01-18', respirations: 15, time: '11:27 AM' },
+  { date: '2016-12-15', respirations: 14, time: '11:09 AM' },
+  { date: '2016-08-16', respirations: 18, time: '1:37 PM' },
+  { date: '2016-04-19', respirations: 16, time: '5:26 PM' },
+  { date: '2016-03-01', respirations: 16, time: '12:11 PM' },
+  { date: '2016-02-24', respirations: 16, time: '6:05 PM' },
+  { date: '2016-01-15', respirations: 16, time: '1:39 PM' },
+  { date: '2015-12-18', respirations: 16, time: '5:05 PM' },
+  { date: '2015-12-09', respirations: 16, time: '11:45 AM' },
+  { date: '2014-12-12', respirations: 20, time: '4:53 PM' },
+  { date: '2014-12-05', respirations: 12, time: '1:07 PM' },
+  { date: '2014-12-02', respirations: 12, time: '11:10 AM' },
+  { date: '2013-08-19', respirations: 14, time: '3:27 PM' },
+  { date: '2012-09-28', respirations: 18, time: '4:30 PM' }
+];
+
 const VITALS_SEED_VERSION = 2;
 let meds = [];
 let vitals = [];
 let medTableState = { key: 'start', dir: 'asc' };
 let vitalTableState = { key: 'date', dir: 'asc' };
 let chartRange = { start: '', end: '' };
-let layerState = { ssri: true, sleep: true, adhd: true, weight: false, systolic: false, diastolic: false, pulse: true, temp: true };
+let layerState = { ssri: true, sleep: true, adhd: true, weight: false, systolic: false, diastolic: false, pulse: true, temp: true, respirations: true };
 
 function getChartRangeDates() {
   const start = chartRange.start ? parseDate(chartRange.start) : null;
@@ -780,7 +832,8 @@ async function loadAll() {
     vitals = [
       ...JSON.parse(JSON.stringify(DEFAULT_VITALS)),
       ...JSON.parse(JSON.stringify(DEFAULT_PULSE_VITALS)),
-      ...JSON.parse(JSON.stringify(DEFAULT_TEMP_VITALS))
+      ...JSON.parse(JSON.stringify(DEFAULT_TEMP_VITALS)),
+      ...JSON.parse(JSON.stringify(DEFAULT_RESPIRATIONS_VITALS))
     ];
     saveVitals();
   } else {
@@ -797,6 +850,10 @@ async function loadAll() {
       const matches = vitals.some(v => v.date === dv.date && v.temp === dv.temp && (v.time || '') === (dv.time || ''));
       if (!matches) { vitals.push(JSON.parse(JSON.stringify(dv))); added = true; }
     });
+    DEFAULT_RESPIRATIONS_VITALS.forEach(dv => {
+      const matches = vitals.some(v => v.date === dv.date && v.respirations === dv.respirations && (v.time || '') === (dv.time || ''));
+      if (!matches) { vitals.push(JSON.parse(JSON.stringify(dv))); added = true; }
+    });
     if (added) saveVitals();
   }
 
@@ -809,8 +866,8 @@ async function loadAll() {
 
   if (layerState.pulse === undefined) layerState.pulse = true;
   if (layerState.temp === undefined) layerState.temp = true;
-
-  render();
+  if (layerState.respirations === undefined) layerState.respirations = true;
+  if (layerState.respirations === undefined) layerState.respirations = true;
 }
 
 async function saveMeds() { try { await window.storage.set('med-tracker:meds', JSON.stringify(meds)); } catch (e) {} }
@@ -947,7 +1004,8 @@ function renderLayerToggles() {
     { key: 'systolic', label: 'Systolic BP', color: resolveColor('var(--systolic)'), type: 'line' },
     { key: 'diastolic', label: 'Diastolic BP', color: resolveColor('var(--diastolic)'), type: 'line' },
     { key: 'pulse', label: 'Pulse', color: resolveColor('var(--pulse)'), type: 'line' },
-    { key: 'temp', label: 'Temp', color: resolveColor('var(--temp)'), type: 'line' }
+    { key: 'temp', label: 'Temp', color: resolveColor('var(--temp)'), type: 'line' },
+    { key: 'respirations', label: 'Respirations', color: '#E6FF66', type: 'line' }
   ];
 
   items.forEach((item) => {
@@ -1008,6 +1066,7 @@ function getVitalSortValue(v, key) {
   if (key === 'dia') return typeof v.dia === 'number' ? v.dia : Number.NEGATIVE_INFINITY;
   if (key === 'pulse') return typeof v.pulse === 'number' ? v.pulse : Number.NEGATIVE_INFINITY;
   if (key === 'temp') return typeof v.temp === 'number' ? v.temp : Number.NEGATIVE_INFINITY;
+  if (key === 'respirations') return typeof v.respirations === 'number' ? v.respirations : Number.NEGATIVE_INFINITY;
   return '';
 }
 
@@ -1102,7 +1161,7 @@ function renderVitalTable() {
   sorted.forEach((v) => {
     const i = vitals.indexOf(v);
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${v.date}</td><td>${v.weight ?? '—'}</td><td>${v.sys ?? '—'}</td><td>${v.dia ?? '—'}</td><td>${v.pulse ?? '—'}</td><td>${v.temp ?? '—'}</td>
+    tr.innerHTML = `<td>${v.date}</td><td>${v.weight ?? '—'}</td><td>${v.sys ?? '—'}</td><td>${v.dia ?? '—'}</td><td>${v.pulse ?? '—'}</td><td>${v.temp ?? '—'}</td><td>${v.respirations ?? '—'}</td>
       <td class="del"><button data-i="${i}">Remove</button></td>`;
 
     const removeBtn = tr.querySelector('button');
@@ -1197,7 +1256,8 @@ function getClosestVitalSnapshot(dateObj) {
     sys: getAverageMetricValue(matches, 'sys'),
     dia: getAverageMetricValue(matches, 'dia'),
     pulse: getAverageMetricValue(matches, 'pulse'),
-    temp: getAverageMetricValue(matches, 'temp')
+    temp: getAverageMetricValue(matches, 'temp'),
+    respirations: getAverageMetricValue(matches, 'respirations')
   };
 }
 
@@ -1220,7 +1280,8 @@ function getSelectedVitalMetrics(showAll = false) {
     { key: 'sys', label: 'Systolic', enabled: layerState.systolic },
     { key: 'dia', label: 'Diastolic', enabled: layerState.diastolic },
     { key: 'pulse', label: 'Pulse', enabled: layerState.pulse },
-    { key: 'temp', label: 'Temp', enabled: layerState.temp }
+    { key: 'temp', label: 'Temp', enabled: layerState.temp },
+    { key: 'respirations', label: 'Respirations', enabled: layerState.respirations }
   ];
 
   return metricOrder.filter((item) => showAll || item.enabled);
@@ -1504,6 +1565,9 @@ function renderChart() {
   if (layerState.temp) {
     drawLine('temp', resolveColor('var(--temp)'), 'Temp');
   }
+  if (layerState.respirations) {
+    drawLine('respirations', '#E6FF66', 'Respirations');
+  }
 
   attachChartHoverTracking();
   scrollChartToEnd();
@@ -1601,16 +1665,19 @@ document.getElementById('clearAll').addEventListener('click', () => {
   vitals = [
     ...JSON.parse(JSON.stringify(DEFAULT_VITALS)),
     ...JSON.parse(JSON.stringify(DEFAULT_PULSE_VITALS)),
-    ...JSON.parse(JSON.stringify(DEFAULT_TEMP_VITALS))
+    ...JSON.parse(JSON.stringify(DEFAULT_TEMP_VITALS)),
+    ...JSON.parse(JSON.stringify(DEFAULT_RESPIRATIONS_VITALS))
   ];
-  layerState = { ssri: true, sleep: true, adhd: true, weight: false, systolic: false, diastolic: false, pulse: true, temp: true };
+  layerState = { ssri: true, sleep: true, adhd: true, weight: false, systolic: false, diastolic: false, pulse: true, temp: true, respirations: true };
   saveMeds();
   saveVitals();
   saveLayers();
   render();
 });
 
-loadAll();
+loadAll().then(() => {
+  render();
+});
 </script>
 </body>
 </html>
