@@ -572,10 +572,13 @@ function renderChart() {
       const color = medPalette[(m._colorIndex ?? 0) % medPalette.length];
       const x1 = xScale(toDecimalYear(m.start));
       const x2 = xScale(toDecimalYear(m.end || TODAY));
-      const y = layout.top + 6 + m._lane * (laneHeight + laneGap);
       const w = Math.max(x2 - x1, 3);
+      const bandTop = layout.top;
+      const bandBottom = nextTop;
+      const barHeight = Math.max(18, bandBottom - bandTop - 2);
+      const y = bandTop + 1;
       const rect = el('rect', {
-        x: x1, y: y, width: w, height: laneHeight, rx: 5,
+        x: x1, y: y, width: w, height: barHeight, rx: 5,
         fill: color, opacity: m.uncertain ? 0.35 : 0.88,
         'stroke-dasharray': m.uncertain ? '5,3' : 'none',
         stroke: m.uncertain ? color : 'none',
@@ -585,7 +588,7 @@ function renderChart() {
       rect.appendChild(el('title', {}, `${m.name} (${m.start} to ${m.end === TODAY ? 'present' : m.end})${m.uncertain ? ' - unconfirmed' : ''}`));
       if (w > 55) {
         svg.appendChild(el('text', {
-          x: x1 + 6, y: y + laneHeight / 2 + 3.5, class: 'med-bar-label',
+          x: x1 + 6, y: y + barHeight / 2 + 3.5, class: 'med-bar-label',
           fill: m.uncertain ? resolveColor('var(--ink)') : '#fff'
         }, m.name.length > Math.floor(w / 6) ? m.name.slice(0, Math.floor(w / 6) - 1) + '…' : m.name));
       }
