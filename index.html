@@ -5,14 +5,14 @@
 <title>Medication &amp; Vitals Timeline</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Unna:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg: #000000;
     --panel: #0a0a0a;
-    --ink: #f3f3f3;
-    --muted: #8b8b8b;
-    --line: rgba(255, 255, 255, 0.1);
+    --ink: #f5f5f5;
+    --muted: #8a8a8a;
+    --line: rgba(255,255,255,0.12);
     --teal: #00f5ff;
     --ssri: #bf7cff;
     --sleep: #00f5ff;
@@ -21,150 +21,235 @@
     --systolic: #00f5ff;
     --diastolic: #bf7cff;
     --radius: 18px;
-    --shadow: rgba(0, 0, 0, 0.0);
+    --shadow: rgba(0, 0, 0, 0);
   }
+
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    background: #000000;
+    background: #000;
     color: var(--ink);
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'VT323', monospace;
+    letter-spacing: 0.02em;
     padding: 28px 20px 60px;
-    letter-spacing: 0.01em;
   }
   .wrap { max-width: 1040px; margin: 0 auto; }
+
   h1 {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 42px;
-    font-weight: 700;
-    margin: 0 0 6px;
-    letter-spacing: 0.02em;
-    color: #f5f1f1;
-    text-shadow: none;
-    line-height: 0.95;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 18px;
+    line-height: 1.5;
+    text-transform: uppercase;
+    margin: 0 0 12px;
+    letter-spacing: 0.06em;
+    color: var(--ink);
   }
-  .sub { color: #f5f1f1; font-size: 14px; margin-bottom: 22px; font-family: 'Unna', serif; letter-spacing: 0.03em; }
+
+  .sub {
+    color: var(--ink);
+    font-size: 12px;
+    margin-bottom: 22px;
+    line-height: 1.5;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
   .panel {
-    background: #0a0a0a;
+    background: var(--panel);
     border: 1px solid rgba(255,255,255,0.08);
     border-radius: 22px;
     padding: 18px 20px;
     margin-bottom: 18px;
-    box-shadow: 0 0 0 1px rgba(255,255,255,0.02), 0 0 20px rgba(0, 245, 255, 0.06);
-    backdrop-filter: none;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.02), 0 0 18px rgba(0,245,255,0.04);
   }
+
   .panel h2 {
-    font-family: 'Unna', serif;
-    font-size: 15px;
+    font-family: 'VT323', monospace;
+    font-size: 22px;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: #f5f1f1;
     margin: 0 0 14px;
-    font-weight: 700;
+    color: var(--ink);
   }
+
   .layers {
     display: flex;
     flex-wrap: wrap;
     gap: 10px 18px;
     margin-bottom: 14px;
   }
+
   .layer-toggle {
     display: flex;
     align-items: center;
     gap: 7px;
-    font-size: 13px;
+    font-size: 16px;
     cursor: pointer;
     user-select: none;
+    color: var(--ink);
   }
-  .swatch { width: 15px; height: 15px; border-radius: 6px; flex-shrink: 0; box-shadow: none; }
-  .swatch.line { border-radius: 999px; height: 6px; margin-top: 4px; }
+
+  .swatch {
+    width: 15px;
+    height: 15px;
+    border-radius: 6px;
+    flex-shrink: 0;
+    box-shadow: none;
+  }
+
+  .swatch.line {
+    border-radius: 999px;
+    height: 6px;
+    margin-top: 4px;
+  }
+
   .chart-scroll {
     overflow-x: auto;
     overflow-y: hidden;
     padding-bottom: 6px;
   }
+
   svg {
     width: 100%;
     min-width: 1200px;
     height: auto;
     display: block;
   }
-  .cat-label { font-size: 12px; fill: var(--ink); font-weight: 600; }
+
+  .cat-label {
+    font-size: 12px;
+    fill: var(--ink);
+    font-family: 'VT323', monospace;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
   .year-label { font-size: 11px; fill: var(--muted); }
-  .med-bar-label { font-size: 10px; fill: #ffffff; font-weight: 600; }
+  .med-bar-label { font-size: 10px; fill: #fff; font-weight: 600; }
   .axis-tick-label { font-size: 10px; fill: var(--muted); }
   .grid-line { stroke: var(--line); stroke-width: 1; }
   .note-text { font-size: 10.5px; fill: var(--muted); font-style: italic; }
-  form.entry { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
-  .field { display: flex; flex-direction: column; gap: 4px; min-width: 110px; }
+
+  form.entry {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: flex-end;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 110px;
+  }
+
   .field.grow { flex: 1; min-width: 160px; }
-  label.f { font-size: 11px; color: #f5f1f1; font-weight: 700; font-family: 'Unna', serif; letter-spacing: 0.08em; text-transform: uppercase; }
-  input, select {
-    font-family: 'Inter', sans-serif;
+
+  label.f {
+    color: var(--ink);
     font-size: 13px;
+    font-family: 'VT323', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  input, select {
+    font-family: 'VT323', monospace;
+    font-size: 18px;
     padding: 11px 13px;
     border: 1px solid rgba(255,255,255,0.14);
     border-radius: 14px;
     background: #0a0a0a;
-    color: #f3f3f3;
+    color: var(--ink);
     box-shadow: inset 0 0 0 1px rgba(0,245,255,0.04);
   }
-  input:focus, select:focus { outline: 2px solid #00f5ff; outline-offset: 1px; border-color: #00f5ff; }
+
+  input:focus, select:focus {
+    outline: 2px solid var(--teal);
+    outline-offset: 1px;
+    border-color: var(--teal);
+  }
+
   button {
-    font-family: 'Unna', serif;
-    font-size: 15px;
-    font-weight: 700;
-    padding: 11px 18px;
+    font-family: 'VT323', monospace;
+    font-size: 23px;
+    font-weight: 400;
+    padding: 12px 16px;
     border-radius: 14px;
     border: none;
     cursor: pointer;
-    background: #00f5ff;
-    color: #000000;
-    box-shadow: 0 0 18px rgba(0,245,255,0.22);
+    background: var(--teal);
+    color: #000;
+    box-shadow: 0 0 18px rgba(0,245,255,0.58);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
     transition: opacity 0.15s ease;
-    letter-spacing: 0.04em;
   }
-  button:hover { opacity: 0.95; transform: none; box-shadow: 0 0 22px rgba(0,245,255,0.26); }
-  button:active { transform: none; box-shadow: 0 0 12px rgba(0,245,255,0.18); }
+
+  button:hover { opacity: 0.96; }
   button.ghost {
     background: #ff4fd8;
-    color: #000000;
-    border: 0;
-    box-shadow: 0 0 18px rgba(255, 79, 216, 0.18);
+    color: #000;
+    box-shadow: 0 0 18px rgba(255, 79, 216, 0.62);
   }
-  .tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+
+  .action-btn {
+    background: var(--action-color, var(--teal));
+    color: #000;
+    border: 0;
+    box-shadow: 0 0 14px var(--action-glow, rgba(0,245,255,0.6));
+    padding: 6px 10px;
+    min-width: 64px;
+    font-size: 17px;
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
   .tab {
     padding: 10px 16px;
-    font-size: 14px;
-    font-weight: 700;
+    font-size: 18px;
     border-radius: 999px;
     background: #bf7cff;
-    color: #000000;
+    color: #000;
     cursor: pointer;
     border: 0;
-    box-shadow: 0 0 16px rgba(191,124,255,0.12);
-    font-family: 'Unna', serif;
-    letter-spacing: 0.05em;
+    box-shadow: 0 0 16px rgba(191,124,255,0.38);
+    font-family: 'VT323', monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
-  .tab.active { background: #00f5ff; color: #000000; box-shadow: 0 0 18px rgba(0,245,255,0.18); }
+
+  .tab.active {
+    background: var(--teal);
+    color: #000;
+    box-shadow: 0 0 18px rgba(0,245,255,0.66);
+  }
+
   .table-header-button {
     background: transparent;
-    color: #f5f1f1;
+    color: var(--ink);
     border: none;
     padding: 0;
-    font: inherit;
-    font-weight: 700;
-    letter-spacing: 0.04em;
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     cursor: pointer;
-    border-radius: 8px;
   }
-  table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 13px; }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 16px; }
   th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); }
-  th { color: #f5f1f1; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+  th { color: var(--ink); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
   td.del { text-align: right; }
-  td.del button { background: transparent; color: #b3486f; padding: 4px 8px; font-size: 12px; }
-  .empty { color: var(--muted); font-size: 13px; padding: 10px 0; }
+  .empty { color: var(--muted); font-size: 15px; padding: 10px 0; }
   .footer-note { color: var(--muted); font-size: 12px; margin-top: 4px; }
 </style>
 </head>
@@ -267,57 +352,37 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 const TODAY = "2026-08-29";
 
 const categories = [
-  {
-    id: 'ssri',
-    name: 'SSRI / Antidepressant',
-    color: 'var(--ssri)'
-  },
-  {
-    id: 'sleep',
-    name: 'Sleep med',
-    color: 'var(--sleep)'
-  },
-  {
-    id: 'adhd',
-    name: 'ADHD med',
-    color: 'var(--adhd)'
-  }
+  { id: 'ssri', name: 'SSRI / Antidepressant', color: 'var(--ssri)' },
+  { id: 'sleep', name: 'Sleep med', color: 'var(--sleep)' },
+  { id: 'adhd', name: 'ADHD med', color: 'var(--adhd)' }
 ];
+
 function buildMedicationPalette(count) {
   const palette = [];
   for (let i = 0; i < count; i++) {
-    const hue = (i * 137.508) % 360;
-    const saturation = 68;
-    const lightness = 52 + (i % 4) * 4;
-    palette.push(`hsl(${hue} ${saturation}% ${lightness}%)`);
+    const colors = ['#bf7cff', '#00f5ff', '#ff4fd8', '#ffe45e', '#7bff8a'];
+    palette.push(colors[i % colors.length]);
   }
   return palette;
 }
 
-// Pre-populated from the user's reconstructed medication history
 const DEFAULT_MEDS = [
-  // SSRI / antidepressant
   { categoryId: 'ssri', name: 'Fluoxetine (Prozac) 10 mg capsule', start: '2018-10-04', end: '2018-12-05' },
   { categoryId: 'ssri', name: 'Bupropion XL (Wellbutrin XL) 150 mg 24 hr tablet', start: '2018-12-05', end: '2020-06-10' },
   { categoryId: 'ssri', name: 'Bupropion SR (Wellbutrin SR) 200 mg 12 hr tablet', start: '2020-06-10', end: '2021-07-29' },
   { categoryId: 'ssri', name: 'Bupropion SR (Wellbutrin SR) 200 mg 12 hr tablet + Venlafaxine XR (Effexor-XR) 75 mg 24 hr capsule', start: '2021-07-29', end: '2022-02-16' },
   { categoryId: 'ssri', name: 'Venlafaxine XR (Effexor-XR) 75 mg 24 hr capsule', start: '2022-02-16', end: '2026-01-27' },
   { categoryId: 'ssri', name: 'Venlafaxine XR (Effexor-XR) 75 mg 24 hr capsule (unconfirmed after last visit)', start: '2026-01-27', end: TODAY, uncertain: true },
-
-  // Sleep med
   { categoryId: 'sleep', name: 'Lorazepam (Ativan) 0.5 mg tablet', start: '2017-12-08', end: '2022-02-16' },
   { categoryId: 'sleep', name: 'Zolpidem CR (Ambien CR) 12.5 mg CR tablet', start: '2022-02-16', end: '2023-04-12' },
   { categoryId: 'sleep', name: 'Temazepam (Restoril) 15 mg capsule', start: '2023-04-12', end: '2025-07-10' },
   { categoryId: 'sleep', name: 'Quetiapine (Seroquel) 25 mg tablet + Temazepam (Restoril) 15 mg capsule', start: '2025-07-10', end: '2026-01-27' },
   { categoryId: 'sleep', name: 'Temazepam (Restoril) 15 mg capsule (unconfirmed after last visit)', start: '2026-01-27', end: TODAY, uncertain: true },
-
-  // ADHD med
   { categoryId: 'adhd', name: 'Amphetamine-dextroamphetamine XR 10 mg 24 hr capsule', start: '2022-02-16', end: '2022-06-16' },
   { categoryId: 'adhd', name: 'Amphetamine-dextroamphetamine XR 20 mg 24 hr capsule', start: '2022-06-16', end: '2025-04-21' },
   { categoryId: 'adhd', name: 'Amphetamine-dextroamphetamine XR 25 mg 24 hr capsule + amphetamine-dextroamphetamine 5 mg tablet', start: '2025-04-21', end: TODAY }
 ];
 
-// Pre-populated from the user's uploaded weight readings
 const DEFAULT_VITALS = [
   { date: '2016-01-15', weight: null, sys: 120, dia: 80 },
   { date: '2016-02-24', weight: null, sys: 96, dia: 50 },
@@ -404,8 +469,8 @@ const DEFAULT_VITALS = [
   { date: '2026-02-11', weight: 233, sys: 110, dia: 70 },
   { date: '2026-07-23', weight: null, sys: 118, dia: 66 }
 ];
-const VITALS_SEED_VERSION = 2;
 
+const VITALS_SEED_VERSION = 2;
 let meds = [];
 let vitals = [];
 let medTableState = { key: 'start', dir: 'asc' };
@@ -417,16 +482,17 @@ async function loadAll() {
   try {
     const m = await window.storage.get('med-tracker:meds');
     if (m) { meds = JSON.parse(m.value); hasStoredMeds = true; }
-  } catch(e) {}
+  } catch (e) {}
   if (!hasStoredMeds) {
     meds = JSON.parse(JSON.stringify(DEFAULT_MEDS));
     saveMeds();
   }
+
   let hasStoredVitals = false;
   try {
     const v = await window.storage.get('med-tracker:vitals');
     if (v) { vitals = JSON.parse(v.value); hasStoredVitals = true; }
-  } catch(e) {}
+  } catch (e) {}
   if (!hasStoredVitals) {
     vitals = JSON.parse(JSON.stringify(DEFAULT_VITALS));
     saveVitals();
@@ -438,16 +504,18 @@ async function loadAll() {
     });
     if (added) saveVitals();
   }
+
   try {
     const l = await window.storage.get('med-tracker:layers');
     if (l) layerState = JSON.parse(l.value);
-  } catch(e) {}
+  } catch (e) {}
+
   render();
 }
 
-async function saveMeds() { try { await window.storage.set('med-tracker:meds', JSON.stringify(meds)); } catch(e) { console.error(e); } }
-async function saveVitals() { try { await window.storage.set('med-tracker:vitals', JSON.stringify(vitals)); } catch(e) { console.error(e); } }
-async function saveLayers() { try { await window.storage.set('med-tracker:layers', JSON.stringify(layerState)); } catch(e) { console.error(e); } }
+async function saveMeds() { try { await window.storage.set('med-tracker:meds', JSON.stringify(meds)); } catch (e) {} }
+async function saveVitals() { try { await window.storage.set('med-tracker:vitals', JSON.stringify(vitals)); } catch (e) {} }
+async function saveLayers() { try { await window.storage.set('med-tracker:layers', JSON.stringify(layerState)); } catch (e) {} }
 
 function resolveColor(c) {
   if (c.startsWith('var(')) {
@@ -457,10 +525,21 @@ function resolveColor(c) {
   return c;
 }
 
+function hexToRgba(hex, alpha = 1) {
+  const clean = hex.replace('#', '');
+  const full = clean.length === 3 ? clean.split('').map((c) => c + c).join('') : clean;
+  const value = parseInt(full, 16);
+  const r = (value >> 16) & 255;
+  const g = (value >> 8) & 255;
+  const b = value & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 function parseDate(str) {
   const [y, m, d] = str.split('-').map(Number);
   return new Date(y, m - 1, d);
 }
+
 function toDecimalYear(str) {
   const dt = parseDate(str);
   const yearStart = new Date(dt.getFullYear(), 0, 1);
@@ -486,18 +565,21 @@ function renderLayerToggles() {
     { key: 'systolic', label: 'Systolic BP', color: resolveColor('var(--systolic)'), type: 'line' },
     { key: 'diastolic', label: 'Diastolic BP', color: resolveColor('var(--diastolic)'), type: 'line' }
   ];
-  items.forEach(item => {
+
+  items.forEach((item) => {
     const label = document.createElement('label');
     label.className = 'layer-toggle';
     const checked = layerState[item.key] !== false;
     label.innerHTML = `<input type="checkbox" ${checked ? 'checked' : ''} data-key="${item.key}">
       <span class="swatch ${item.type === 'line' ? 'line' : ''}" style="background:${item.color}"></span>
       <span>${item.label}</span>`;
+
     label.querySelector('input').addEventListener('change', (e) => {
       layerState[item.key] = e.target.checked;
       saveLayers();
       renderChart();
     });
+
     el.appendChild(label);
   });
 }
@@ -572,12 +654,14 @@ function renderMedTable() {
   const tbody = document.querySelector('#medTable tbody');
   tbody.innerHTML = '';
   document.getElementById('medEmpty').style.display = meds.length ? 'none' : 'block';
+
   const sorted = [...meds].sort((a, b) => {
     const av = getMedSortValue(a, medTableState.key);
     const bv = getMedSortValue(b, medTableState.key);
     const diff = av instanceof Date && bv instanceof Date ? (av - bv) : String(av).localeCompare(String(bv), undefined, { numeric: true, sensitivity: 'base' });
     return medTableState.dir === 'asc' ? diff : -diff;
   });
+
   sorted.forEach((m) => {
     const i = meds.indexOf(m);
     const cat = categories.find(c => c.id === m.categoryId);
@@ -587,7 +671,15 @@ function renderMedTable() {
         <button type="button" data-action="edit" data-i="${i}">Edit</button>
         <button type="button" data-action="remove" data-i="${i}">Remove</button>
       </td>`;
+
+    const actionColor = cat ? resolveColor(cat.color) : '#00f5ff';
     tr.querySelectorAll('button').forEach((button) => {
+      button.classList.add('action-btn');
+      button.style.setProperty('--action-color', actionColor);
+      button.style.setProperty('--action-glow', hexToRgba(actionColor, 0.7));
+      button.style.background = actionColor;
+      button.style.color = '#000';
+      button.style.boxShadow = `0 0 18px ${hexToRgba(actionColor, 0.7)}`;
       button.addEventListener('click', () => {
         const action = button.dataset.action;
         if (action === 'remove') {
@@ -599,12 +691,15 @@ function renderMedTable() {
         populateMedFormForEdit(i);
       });
     });
+
     tbody.appendChild(tr);
   });
+
   document.querySelectorAll('#medTable .table-header-button').forEach((button) => {
     const active = button.dataset.key === medTableState.key;
     button.textContent = `${button.textContent.replace(/[ ↑↓]$/, '')}${active ? (medTableState.dir === 'asc' ? ' ↑' : ' ↓') : ''}`;
   });
+
   attachTableSortHandlers();
 }
 
@@ -612,32 +707,45 @@ function renderVitalTable() {
   const tbody = document.querySelector('#vitalTable tbody');
   tbody.innerHTML = '';
   document.getElementById('vitalEmpty').style.display = vitals.length ? 'none' : 'block';
+
   const sorted = [...vitals].sort((a, b) => {
     const av = getVitalSortValue(a, vitalTableState.key);
     const bv = getVitalSortValue(b, vitalTableState.key);
     const diff = av > bv ? 1 : av < bv ? -1 : 0;
     return vitalTableState.dir === 'asc' ? diff : -diff;
   });
+
   sorted.forEach((v) => {
     const i = vitals.indexOf(v);
     const tr = document.createElement('tr');
     tr.innerHTML = `<td>${v.date}</td><td>${v.weight ?? '—'}</td><td>${v.sys ?? '—'}</td><td>${v.dia ?? '—'}</td>
       <td class="del"><button data-i="${i}">Remove</button></td>`;
-    tr.querySelector('button').addEventListener('click', () => {
+
+    const removeBtn = tr.querySelector('button');
+    removeBtn.classList.add('action-btn');
+    const removeColor = '#585858';
+    removeBtn.style.setProperty('--action-color', removeColor);
+    removeBtn.style.setProperty('--action-glow', hexToRgba(removeColor, 0.6));
+    removeBtn.style.background = removeColor;
+    removeBtn.style.color = '#f5f5f5';
+    removeBtn.style.boxShadow = `0 0 16px ${hexToRgba(removeColor, 0.6)}`;
+    removeBtn.addEventListener('click', () => {
       vitals.splice(i, 1);
       saveVitals();
       render();
     });
+
     tbody.appendChild(tr);
   });
+
   document.querySelectorAll('#vitalTable .table-header-button').forEach((button) => {
     const active = button.dataset.key === vitalTableState.key;
     button.textContent = `${button.textContent.replace(/[ ↑↓]$/, '')}${active ? (vitalTableState.dir === 'asc' ? ' ↑' : ' ↓') : ''}`;
   });
+
   attachTableSortHandlers();
 }
 
-// ---- Chart rendering ----
 function renderChart() {
   const svg = document.getElementById('chart');
   svg.innerHTML = '';
@@ -651,42 +759,44 @@ function renderChart() {
   meds.forEach(m => { years.push(toDecimalYear(m.start)); years.push(toDecimalYear(m.end || TODAY)); });
   vitals.forEach(v => years.push(toDecimalYear(v.date)));
   if (years.length === 0) { years = [2020, 2026]; }
+
   let yearMin = Math.floor(Math.min(...years));
   let yearMax = Math.ceil(Math.max(...years));
-  if (yearMax - yearMin < 3) { yearMax = yearMin + 3; }
+  if (yearMax - yearMin < 3) {
+    yearMax = yearMin + 3;
+  }
 
   const xScale = (yr) => marginLeft + ((yr - yearMin) / (yearMax - yearMin)) * plotW;
-
   const laneHeight = 24, laneGap = 5, catGap = 16;
   const medPalette = buildMedicationPalette(Math.max(1, meds.length));
   const medsInTimeOrder = [...meds].sort((a, b) => parseDate(a.start) - parseDate(b.start));
-  medsInTimeOrder.forEach((m, index) => {
-    m._colorIndex = index;
-  });
+  medsInTimeOrder.forEach((m, index) => { m._colorIndex = index; });
 
   const visibleCategories = categories.filter(cat => layerState[cat.id] !== false);
   const catLayout = {};
   let yCursor = plotTop;
+
   visibleCategories.forEach(cat => {
     const catMeds = meds.filter(m => m.categoryId === cat.id).sort((a,b) => parseDate(a.start) - parseDate(b.start));
     const lanesEnd = [];
     catMeds.forEach(m => {
       const s = toDecimalYear(m.start), e = toDecimalYear(m.end || TODAY);
       let lane = lanesEnd.findIndex(endY => endY <= s + 0.01);
-      if (lane === -1) { lane = lanesEnd.length; }
+      if (lane === -1) lane = lanesEnd.length;
       lanesEnd[lane] = e;
       m._lane = lane;
     });
+
     const numLanes = Math.max(1, lanesEnd.length);
     const bandHeight = numLanes * (laneHeight + laneGap) + 8;
     catLayout[cat.id] = { top: yCursor, height: bandHeight, meds: catMeds };
     yCursor += bandHeight + catGap;
   });
+
   const catAreaBottom = yCursor - catGap;
   const overlayTop = plotTop;
   const overlayBottom = Math.max(catAreaBottom, plotTop + 140);
   const totalHeight = overlayBottom;
-
   svg.setAttribute('viewBox', `0 0 ${W} ${totalHeight + marginBottom}`);
 
   function el(tag, attrs, text) {
@@ -710,6 +820,7 @@ function renderChart() {
     const bandFill = resolveColor(cat.color);
     const orderIndex = visibleLayoutOrder.indexOf(layout);
     const nextTop = orderIndex === visibleLayoutOrder.length - 1 ? overlayBottom : visibleLayoutOrder[orderIndex + 1].top;
+
     svg.appendChild(el('rect', {
       x: marginLeft,
       y: layout.top - 4,
@@ -719,6 +830,7 @@ function renderChart() {
       opacity: 0.08,
       rx: 10
     }));
+
     svg.appendChild(el('text', { x: 8, y: layout.top + 15, class: 'cat-label' }, cat.name));
 
     layout.meds.forEach(m => {
@@ -726,13 +838,16 @@ function renderChart() {
       const x1 = xScale(toDecimalYear(m.start));
       const x2 = xScale(toDecimalYear(m.end || TODAY));
       const w = Math.max(x2 - x1, 3);
-      const bandTop = layout.top;
-      const bandBottom = nextTop;
-      const barHeight = Math.max(18, bandBottom - bandTop - 2);
-      const y = bandTop + 1;
+      const barHeight = Math.max(18, (nextTop - layout.top) - 2);
+      const y = layout.top + 1;
       const rect = el('rect', {
-        x: x1, y: y, width: w, height: barHeight, rx: 5,
-        fill: color, opacity: m.uncertain ? 0.35 : 0.88,
+        x: x1,
+        y: y,
+        width: w,
+        height: barHeight,
+        rx: 5,
+        fill: color,
+        opacity: m.uncertain ? 0.35 : 0.88,
         'stroke-dasharray': m.uncertain ? '5,3' : 'none',
         stroke: m.uncertain ? color : 'none',
         'stroke-width': m.uncertain ? 1.5 : 0
@@ -741,54 +856,72 @@ function renderChart() {
       rect.appendChild(el('title', {}, `${m.name} (${m.start} to ${m.end === TODAY ? 'present' : m.end})${m.uncertain ? ' - unconfirmed' : ''}`));
       if (w > 55) {
         svg.appendChild(el('text', {
-          x: x1 + 6, y: y + barHeight / 2 + 3.5, class: 'med-bar-label',
-          fill: m.uncertain ? resolveColor('var(--ink)') : '#fff'
+          x: x1 + 6,
+          y: y + barHeight / 2 + 3.5,
+          class: 'med-bar-label',
+          fill: m.uncertain ? '#000' : '#fff'
         }, m.name.length > Math.floor(w / 6) ? m.name.slice(0, Math.floor(w / 6) - 1) + '…' : m.name));
       }
     });
   });
 
-  const sortedVitals = [...vitals].sort((a,b) => parseDate(a.date) - parseDate(b.date));
-  function drawLine(key, color, dashed, label) {
+  const sortedVitals = [...vitals].sort((a, b) => parseDate(a.date) - parseDate(b.date));
+  function drawLine(key, color, label) {
     const pts = sortedVitals.filter(v => v[key] !== undefined && v[key] !== null && v[key] !== '');
     if (pts.length === 0) return;
     const vals = pts.map(p => Number(p[key]));
     let vMin = Math.min(...vals), vMax = Math.max(...vals);
-    if (vMin === vMax) { vMin -= 1; vMax += 1; }
-    const pad = (vMax - vMin) * 0.15;
-    vMin -= pad; vMax += pad;
-    const yFor = (v) => overlayBottom - ((v - vMin) / (vMax - vMin)) * (overlayBottom - overlayTop);
-    const pathD = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${xScale(toDecimalYear(p.date))} ${yFor(Number(p[key]))}`).join(' ');
-    svg.appendChild(el('path', { d: pathD, fill: 'none', stroke: color, 'stroke-width': 2.5, 'stroke-dasharray': dashed ? '6,4' : 'none' }));
-    pts.forEach(p => {
-      svg.appendChild(el('circle', { cx: xScale(toDecimalYear(p.date)), cy: yFor(Number(p[key])), r: 3.5, fill: color }));
-    });
-    svg.appendChild(el('text', { x: W - marginRight + 8, y: yFor(vMax) + 4, class: 'axis-tick-label', fill: color }, label + ' ' + Math.round(vMax)));
-    svg.appendChild(el('text', { x: W - marginRight + 8, y: yFor(vMin) + 4, class: 'axis-tick-label', fill: color }, Math.round(vMin)));
+    if (vMax === vMin) vMax += 1;
+    const ptsSvg = pts.map((p) => {
+      const x = xScale(toDecimalYear(p.date));
+      const y = marginTop + ((vMax - Number(p[key])) / (vMax - vMin)) * (overlayBottom - marginTop - 10);
+      return `${x},${y}`;
+    }).join(' ');
+    svg.appendChild(el('polyline', {
+      points: ptsSvg,
+      fill: 'none',
+      stroke: color,
+      'stroke-width': 2,
+      'stroke-linecap': 'round',
+      'stroke-linejoin': 'round',
+      opacity: 0.9
+    }));
+    if (pts.length > 0) {
+      const last = pts[pts.length - 1];
+      const x = xScale(toDecimalYear(last.date));
+      const y = marginTop + ((vMax - Number(last[key])) / (vMax - vMin)) * (overlayBottom - marginTop - 10);
+      svg.appendChild(el('circle', { cx: x, cy: y, r: 4, fill: color }));
+    }
   }
 
-  if (layerState.weight !== false) drawLine('weight', resolveColor('var(--weight)'), false, 'Wt');
-  if (layerState.systolic !== false) drawLine('sys', resolveColor('var(--systolic)'), false, 'Sys');
-  if (layerState.diastolic !== false) drawLine('dia', resolveColor('var(--diastolic)'), true, 'Dia');
-
-  if (vitals.length === 0) {
-    svg.appendChild(el('text', { x: marginLeft, y: overlayBottom + 34, class: 'note-text' }, 'Add weight/BP readings in the tab below to layer them on this chart.'));
+  if (layerState.weight) {
+    drawLine('weight', resolveColor('var(--weight)'), 'Weight');
+  }
+  if (layerState.systolic) {
+    drawLine('sys', resolveColor('var(--systolic)'), 'Systolic');
+  }
+  if (layerState.diastolic) {
+    drawLine('dia', resolveColor('var(--diastolic)'), 'Diastolic');
   }
 }
 
-document.getElementById('medForm').addEventListener('submit', (e) => {
+const medForm = document.getElementById('medForm');
+medForm.addEventListener('submit', (e) => {
   e.preventDefault();
-  const categoryId = document.getElementById('medCategory').value;
-  const name = document.getElementById('medName').value.trim();
-  const start = document.getElementById('medStart').value;
-  const end = document.getElementById('medEnd').value || TODAY;
-  if (!name || !start) return;
+  const indexVal = document.getElementById('medEditIndex').value;
+  const entry = {
+    categoryId: document.getElementById('medCategory').value,
+    name: document.getElementById('medName').value.trim(),
+    start: document.getElementById('medStart').value,
+    end: document.getElementById('medEnd').value || TODAY
+  };
 
-  const editIndex = document.getElementById('medEditIndex').value;
-  if (editIndex !== '') {
-    meds[Number(editIndex)] = { ...meds[Number(editIndex)], categoryId, name, start, end };
+  if (!entry.name || !entry.start) return;
+
+  if (indexVal !== '') {
+    meds[Number(indexVal)] = entry;
   } else {
-    meds.push({ categoryId, name, start, end });
+    meds.push(entry);
   }
 
   saveMeds();
@@ -796,9 +929,7 @@ document.getElementById('medForm').addEventListener('submit', (e) => {
   render();
 });
 
-document.getElementById('medCancelEdit').addEventListener('click', () => {
-  resetMedForm();
-});
+document.getElementById('medCancelEdit').addEventListener('click', resetMedForm);
 
 document.getElementById('vitalForm').addEventListener('submit', (e) => {
   e.preventDefault();
@@ -807,31 +938,35 @@ document.getElementById('vitalForm').addEventListener('submit', (e) => {
   const sys = document.getElementById('vitalSys').value;
   const dia = document.getElementById('vitalDia').value;
   if (!date) return;
+
   vitals.push({
     date,
-    weight: weight ? parseFloat(weight) : null,
-    sys: sys ? parseFloat(sys) : null,
-    dia: dia ? parseFloat(dia) : null
+    weight: weight === '' ? null : Number(weight),
+    sys: sys === '' ? null : Number(sys),
+    dia: dia === '' ? null : Number(dia)
   });
+
   saveVitals();
-  e.target.reset();
+  document.getElementById('vitalForm').reset();
   render();
 });
 
-document.querySelectorAll('.tab').forEach(tab => {
+document.querySelectorAll('.tab').forEach((tab) => {
   tab.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    document.getElementById('tab-med').style.display = tab.dataset.tab === 'med' ? 'block' : 'none';
-    document.getElementById('tab-vital').style.display = tab.dataset.tab === 'vital' ? 'block' : 'none';
+    const target = tab.dataset.tab;
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === tab));
+    document.getElementById('tab-med').style.display = target === 'med' ? 'block' : 'none';
+    document.getElementById('tab-vital').style.display = target === 'vital' ? 'block' : 'none';
   });
 });
 
-document.getElementById('clearAll').addEventListener('click', async () => {
-  if (!confirm('Reset medications back to the default reconstructed history and clear all vitals? This cannot be undone.')) return;
+document.getElementById('clearAll').addEventListener('click', () => {
   meds = JSON.parse(JSON.stringify(DEFAULT_MEDS));
   vitals = JSON.parse(JSON.stringify(DEFAULT_VITALS));
-  await saveMeds(); await saveVitals();
+  layerState = { ssri: true, sleep: true, adhd: true, weight: false, systolic: false, diastolic: false };
+  saveMeds();
+  saveVitals();
+  saveLayers();
   render();
 });
 
