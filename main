@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Medication &amp; Vitals Timeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #f6f5f1;
+    --panel: #ffffff;
+    --ink: #1f2a2e;
+    --muted: #6b7680;
+    --line: #e2e0d8;
+    --teal: #2f6f6a;
+    --ssri: #3b6fa0;
+    --sleep: #2f8f6f;
+    --adhd: #c98a3a;
+    --weight: #b3486f;
+    --systolic: #6a4fb0;
+    --diastolic: #9a86d8;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    padding: 28px 20px 60px;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; }
+  h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .sub { color: var(--muted); font-size: 14px; margin-bottom: 22px; }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 18px;
+  }
+  .panel h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin: 0 0 14px;
+    font-weight: 600;
+  }
+  .layers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+    margin-bottom: 14px;
+  }
+  .layer-toggle {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .swatch { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+  .swatch.line { border-radius: 0; height: 3px; margin-top: 4px; }
+  svg { width: 100%; height: auto; display: block; }
+  .cat-label { font-size: 12px; fill: var(--ink); font-weight: 600; }
+  .year-label { font-size: 11px; fill: var(--muted); }
+  .med-bar-label { font-size: 10px; fill: #ffffff; font-weight: 600; }
+  .axis-tick-label { font-size: 10px; fill: var(--muted); }
+  .grid-line { stroke: var(--line); stroke-width: 1; }
+  .note-text { font-size: 10.5px; fill: var(--muted); font-style: italic; }
+  form.entry { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+  .field { display: flex; flex-direction: column; gap: 4px; min-width: 110px; }
+  .field.grow { flex: 1; min-width: 160px; }
+  label.f { font-size: 11px; color: var(--muted); font-weight: 500; }
+  input, select {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 7px 9px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: #fcfcfa;
+    color: var(--ink);
+  }
+  input:focus, select:focus { outline: 2px solid var(--teal); outline-offset: 1px; }
+  button {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 7px;
+    border: none;
+    cursor: pointer;
+    background: var(--teal);
+    color: white;
+  }
+  button:hover { opacity: 0.9; }
+  button.ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--line);
+  }
+  .tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+  .tab {
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 999px;
+    background: #efeee8;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .tab.active { background: var(--teal); color: white; }
+  table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 13px; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+  td.del { text-align: right; }
+  td.del button { background: transparent; color: #b3486f; padding: 4px 8px; font-size: 12px; }
+  .empty { color: var(--muted); font-size: 13px; padding: 10px 0; }
+  .footer-note { color: var(--muted); font-size: 12px; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Medication &amp; Vitals Timeline</h1>
+  <div class="sub">Data is saved to your browser automatically — only visible to you. Lighter dashed bars = unconfirmed / not yet verified.</div>
+
+  <div class="panel">
+    <h2>Layers</h2>
+    <div class="layers" id="layerToggles"></div>
+    <svg id="chart" viewBox="0 0 980 480" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
+
+  <div class="panel">
+    <div class="tabs">
+      <div class="tab active" data-tab="med">Medications</div>
+      <div class="tab" data-tab="vital">Weight &amp; BP</div>
+    </div>
+
+    <div id="tab-med">
+      <form class="entry" id="medForm">
+        <div class="field">
+          <label class="f">Category</label>
+          <select id="medCategory"></select>
+        </div>
+        <div class="field grow">
+          <label class="f">Medication name</label>
+          <input id="medName" type="text" placeholder="e.g. Sertraline" required>
+        </div>
+        <div class="field">
+          <label class="f">Start date</label>
+          <input id="medStart" type="date" required>
+        </div>
+        <div class="field">
+          <label class="f">End date</label>
+          <input id="medEnd" type="date" placeholder="blank = ongoing">
+        </div>
+        <button type="submit">Add medication</button>
+      </form>
+      <table id="medTable">
+        <thead><tr><th>Category</th><th>Medication</th><th>Start</th><th>End</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="medEmpty" style="display:none;">No medications added yet.</div>
+    </div>
+
+    <div id="tab-vital" style="display:none;">
+      <form class="entry" id="vitalForm">
+        <div class="field">
+          <label class="f">Date</label>
+          <input id="vitalDate" type="date" required>
+        </div>
+        <div class="field">
+          <label class="f">Weight (lb)</label>
+          <input id="vitalWeight" type="number" step="0.1" placeholder="165">
+        </div>
+        <div class="field">
+          <label class="f">Systolic BP</label>
+          <input id="vitalSys" type="number" placeholder="120">
+        </div>
+        <div class="field">
+          <label class="f">Diastolic BP</label>
+          <input id="vitalDia" type="number" placeholder="80">
+        </div>
+        <button type="submit">Add reading</button>
+      </form>
+      <table id="vitalTable">
+        <thead><tr><th>Date</th><th>Weight</th><th>Systolic</th><th>Diastolic</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty" id="vitalEmpty" style="display:none;">No readings added yet. Switch to this tab and add your weight/BP data to layer it on the chart.</div>
+    </div>
+  </div>
+
+  <button class="ghost" id="clearAll">Reset to default data</button>
+</div>
+
+<script>
+const SVG_NS = "http://www.w3.org/2000/svg";
+const TODAY = "2026-08-29";
+
+const categories = [
+  { id: 'ssri', name: 'SSRI / Antidepressant', color: 'var(--ssri)' },
+  { id: 'sleep', name: 'Sleep med', color: 'var(--sleep)' },
+  { id: 'adhd', name: 'ADHD med', color: 'var(--adhd)' }
+];
+
+// Pre-populated from the user's reconstructed medication history
+const DEFAULT_MEDS = [
+  // SSRI / antidepressant
+  { categoryId: 'ssri', name: 'Fluoxetine (Prozac) 10mg', start: '2018-10-04', end: '2018-10-23' },
+  { categoryId: 'ssri', name: 'Bupropion XL 150mg', start: '2018-12-05', end: '2020-05-18' },
+  { categoryId: 'ssri', name: 'Bupropion SR 200mg', start: '2020-06-10', end: '2020-12-17' },
+  { categoryId: 'ssri', name: 'Bupropion SR 200mg + Venlafaxine XR 75mg', start: '2021-07-29', end: '2022-01-19' },
+  { categoryId: 'ssri', name: 'Venlafaxine XR 75mg', start: '2022-02-16', end: '2026-01-27' },
+  { categoryId: 'ssri', name: 'Venlafaxine XR 75mg (unconfirmed after last visit)', start: '2026-01-27', end: TODAY, uncertain: true },
+
+  // Sleep med
+  { categoryId: 'sleep', name: 'Lorazepam (Ativan) 0.5mg', start: '2017-12-08', end: '2022-01-19' },
+  { categoryId: 'sleep', name: 'Zolpidem CR (Ambien CR) 12.5mg', start: '2022-02-16', end: '2022-10-27' },
+  { categoryId: 'sleep', name: 'Temazepam (Restoril) 15mg', start: '2023-04-12', end: '2025-04-21' },
+  { categoryId: 'sleep', name: 'Temazepam 15mg + Quetiapine (Seroquel) 25mg', start: '2025-07-10', end: '2025-07-21' },
+  { categoryId: 'sleep', name: 'Temazepam (Restoril) 15mg', start: '2026-01-27', end: TODAY, uncertain: true },
+
+  // ADHD med
+  { categoryId: 'adhd', name: 'Amph-dextroamph XR 10mg', start: '2022-02-16', end: '2022-06-15' },
+  { categoryId: 'adhd', name: 'Amph-dextroamph XR 20mg', start: '2022-06-16', end: '2024-12-30' },
+  { categoryId: 'adhd', name: 'Amph-dextroamph XR 25mg + 5mg tablet', start: '2025-04-21', end: TODAY }
+];
+
+// Pre-populated from the user's uploaded weight readings
+const DEFAULT_VITALS = [
+  { date: '2016-01-15', weight: null, sys: 120, dia: 80 },
+  { date: '2016-02-24', weight: null, sys: 96, dia: 50 },
+  { date: '2016-03-01', weight: null, sys: 122, dia: 70 },
+  { date: '2016-04-19', weight: null, sys: 120, dia: 80 },
+  { date: '2016-08-16', weight: 190, sys: 120, dia: 70 },
+  { date: '2016-11-10', weight: 187, sys: 106, dia: 62 },
+  { date: '2016-11-15', weight: 186, sys: 118, dia: 72 },
+  { date: '2016-11-21', weight: 192, sys: 118, dia: 70 },
+  { date: '2016-11-30', weight: 191, sys: 118, dia: 70 },
+  { date: '2016-12-05', weight: 193, sys: 124, dia: 80 },
+  { date: '2016-12-15', weight: 190, sys: 125, dia: 80 },
+  { date: '2016-12-21', weight: 194, sys: 108, dia: 60 },
+  { date: '2017-02-08', weight: 191, sys: 120, dia: 76 },
+  { date: '2017-03-09', weight: 190, sys: 96, dia: 64 },
+  { date: '2017-11-08', weight: 168, sys: 112, dia: 58 },
+  { date: '2017-12-08', weight: 171, sys: 108, dia: 56 },
+  { date: '2018-01-18', weight: 160, sys: 100, dia: 58 },
+  { date: '2018-02-02', weight: 179, sys: 100, dia: 62 },
+  { date: '2018-10-04', weight: 197.5, sys: 108, dia: 70 },
+  { date: '2018-10-24', weight: 194, sys: 114, dia: 74 },
+  { date: '2018-12-05', weight: 201, sys: 118, dia: 68 },
+  { date: '2019-02-04', weight: null, sys: 134, dia: 76 },
+  { date: '2019-04-18', weight: 208.5, sys: 126, dia: 76 },
+  { date: '2019-05-14', weight: 209.5, sys: 120, dia: 64 },
+  { date: '2019-06-18', weight: 208, sys: 110, dia: 70 },
+  { date: '2019-10-04', weight: 208, sys: 120, dia: 70 },
+  { date: '2019-10-22', weight: 204.5, sys: 102, dia: 70 },
+  { date: '2019-10-29', weight: 208.5, sys: 130, dia: 76 },
+  { date: '2019-12-17', weight: 211, sys: 116, dia: 68 },
+  { date: '2020-01-24', weight: null, sys: 116, dia: 72 },
+  { date: '2020-04-08', weight: 206.5, sys: 110, dia: 68 },
+  { date: '2020-04-15', weight: null, sys: 100, dia: 70 },
+  { date: '2020-04-26', weight: null, sys: 102, dia: 66 },
+  { date: '2020-05-18', weight: null, sys: 137, dia: 68 },
+  { date: '2020-06-03', weight: 200.84, sys: 113, dia: 71, time: '4:49 PM' },
+  { date: '2020-06-03', weight: null, sys: 115, dia: 77, time: '5:03 PM' },
+  { date: '2020-06-03', weight: null, sys: 119, dia: 78, time: '5:30 PM' },
+  { date: '2020-06-03', weight: null, sys: 105, dia: 59, time: '6:30 PM' },
+  { date: '2020-06-03', weight: null, sys: 115, dia: 74, time: '7:15 PM' },
+  { date: '2020-06-03', weight: null, sys: 107, dia: 77, time: '7:45 PM' },
+  { date: '2020-06-10', weight: 198, sys: 118, dia: 68 },
+  { date: '2020-07-14', weight: null, sys: 116, dia: 60 },
+  { date: '2020-09-09', weight: 185, sys: 108, dia: 64 },
+  { date: '2020-09-17', weight: 185, sys: 119, dia: 76 },
+  { date: '2020-12-17', weight: 185, sys: 108, dia: 71 },
+  { date: '2021-03-18', weight: 159, sys: 116, dia: 77, time: '4:42 PM' },
+  { date: '2021-03-18', weight: null, sys: 107, dia: 76, time: '5:00 PM' },
+  { date: '2021-03-18', weight: null, sys: 103, dia: 75, time: '5:30 PM' },
+  { date: '2021-03-18', weight: null, sys: 108, dia: 71, time: '6:00 PM' },
+  { date: '2021-03-18', weight: null, sys: 122, dia: 82, time: '6:55 PM' },
+  { date: '2021-03-18', weight: null, sys: 122, dia: 88, time: '7:00 PM' },
+  { date: '2021-03-18', weight: null, sys: 118, dia: 83, time: '7:30 PM' },
+  { date: '2021-03-18', weight: null, sys: 113, dia: 73, time: '8:00 PM' },
+  { date: '2021-07-29', weight: 158.5, sys: 110, dia: 68 },
+  { date: '2022-01-19', weight: 160, sys: 104, dia: 68 },
+  { date: '2022-02-16', weight: 165.8, sys: 100, dia: 62 },
+  { date: '2022-06-16', weight: 162, sys: 108, dia: 58 },
+  { date: '2022-07-07', weight: 161, sys: 96, dia: 66 },
+  { date: '2022-07-25', weight: 159, sys: 100, dia: 58 },
+  { date: '2022-10-27', weight: 162.5, sys: 130, dia: 74 },
+  { date: '2023-04-12', weight: 180.5, sys: 100, dia: 68 },
+  { date: '2023-05-18', weight: 183, sys: 94, dia: 64 },
+  { date: '2023-05-31', weight: null, sys: 102, dia: 50, time: '9:31 AM' },
+  { date: '2023-05-31', weight: null, sys: 116, dia: 74, time: '9:50 AM' },
+  { date: '2023-05-31', weight: null, sys: 89, dia: 55, time: '10:10 AM' },
+  { date: '2023-05-31', weight: null, sys: 88, dia: 59, time: '10:15 AM' },
+  { date: '2023-05-31', weight: null, sys: 99, dia: 68, time: '10:20 AM' },
+  { date: '2023-05-31', weight: null, sys: 88, dia: 62, time: '10:30 AM' },
+  { date: '2023-05-31', weight: null, sys: 105, dia: 66, time: '10:40 AM' },
+  { date: '2023-07-18', weight: null, sys: 106, dia: 70 },
+  { date: '2023-07-21', weight: null, sys: 126, dia: 70 },
+  { date: '2023-11-21', weight: 199, sys: 127, dia: 69 },
+  { date: '2024-03-17', weight: 199, sys: 119, dia: 78 },
+  { date: '2024-08-15', weight: 220, sys: 122, dia: 70 },
+  { date: '2024-12-30', weight: 229, sys: 127, dia: 73 },
+  { date: '2025-04-21', weight: 238, sys: 130, dia: 70 },
+  { date: '2025-07-10', weight: 229.8, sys: 104, dia: 74 },
+  { date: '2025-07-21', weight: 230, sys: 130, dia: 82, time: '2:33 PM' },
+  { date: '2025-07-21', weight: null, sys: 120, dia: 82, time: '3:18 PM' },
+  { date: '2025-08-29', weight: 224, sys: 116, dia: 70 },
+  { date: '2026-01-08', weight: 226, sys: 116, dia: 62, time: '5:12 PM' },
+  { date: '2026-01-08', weight: null, sys: 112, dia: 66, time: '6:48 PM' },
+  { date: '2026-02-11', weight: 233, sys: 110, dia: 70 },
+  { date: '2026-07-23', weight: null, sys: 118, dia: 66 }
+];
+const VITALS_SEED_VERSION = 2;
+
+let meds = [];
+let vitals = [];
+let layerState = { ssri: true, sleep: true, adhd: true, weight: true, systolic: true, diastolic: true };
+
+async function loadAll() {
+  let hasStoredMeds = false;
+  try {
+    const m = await window.storage.get('med-tracker:meds');
+    if (m) { meds = JSON.parse(m.value); hasStoredMeds = true; }
+  } catch(e) {}
+  if (!hasStoredMeds) {
+    meds = JSON.parse(JSON.stringify(DEFAULT_MEDS));
+    saveMeds();
+  }
+  let hasStoredVitals = false;
+  try {
+    const v = await window.storage.get('med-tracker:vitals');
+    if (v) { vitals = JSON.parse(v.value); hasStoredVitals = true; }
+  } catch(e) {}
+  if (!hasStoredVitals) {
+    vitals = JSON.parse(JSON.stringify(DEFAULT_VITALS));
+    saveVitals();
+  } else {
+    const existingDates = new Set(vitals.map(v => v.date));
+    let added = false;
+    DEFAULT_VITALS.forEach(dv => {
+      if (!existingDates.has(dv.date)) { vitals.push(JSON.parse(JSON.stringify(dv))); added = true; }
+    });
+    if (added) saveVitals();
+  }
+  try {
+    const l = await window.storage.get('med-tracker:layers');
+    if (l) layerState = JSON.parse(l.value);
+  } catch(e) {}
+  render();
+}
+
+async function saveMeds() { try { await window.storage.set('med-tracker:meds', JSON.stringify(meds)); } catch(e) { console.error(e); } }
+async function saveVitals() { try { await window.storage.set('med-tracker:vitals', JSON.stringify(vitals)); } catch(e) { console.error(e); } }
+async function saveLayers() { try { await window.storage.set('med-tracker:layers', JSON.stringify(layerState)); } catch(e) { console.error(e); } }
+
+function resolveColor(c) {
+  if (c.startsWith('var(')) {
+    const varName = c.slice(4, -1);
+    return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+  }
+  return c;
+}
+
+function parseDate(str) {
+  const [y, m, d] = str.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+function toDecimalYear(str) {
+  const dt = parseDate(str);
+  const yearStart = new Date(dt.getFullYear(), 0, 1);
+  const yearEnd = new Date(dt.getFullYear() + 1, 0, 1);
+  const frac = (dt - yearStart) / (yearEnd - yearStart);
+  return dt.getFullYear() + frac;
+}
+
+function render() {
+  renderLayerToggles();
+  renderMedForm();
+  renderMedTable();
+  renderVitalTable();
+  renderChart();
+}
+
+function renderLayerToggles() {
+  const el = document.getElementById('layerToggles');
+  el.innerHTML = '';
+  const items = [
+    ...categories.map(c => ({ key: c.id, label: c.name, color: resolveColor(c.color), type: 'box' })),
+    { key: 'weight', label: 'Weight', color: resolveColor('var(--weight)'), type: 'line' },
+    { key: 'systolic', label: 'Systolic BP', color: resolveColor('var(--systolic)'), type: 'line' },
+    { key: 'diastolic', label: 'Diastolic BP', color: resolveColor('var(--diastolic)'), type: 'line' }
+  ];
+  items.forEach(item => {
+    const label = document.createElement('label');
+    label.className = 'layer-toggle';
+    const checked = layerState[item.key] !== false;
+    label.innerHTML = `<input type="checkbox" ${checked ? 'checked' : ''} data-key="${item.key}">
+      <span class="swatch ${item.type === 'line' ? 'line' : ''}" style="background:${item.color}"></span>
+      <span>${item.label}</span>`;
+    label.querySelector('input').addEventListener('change', (e) => {
+      layerState[item.key] = e.target.checked;
+      saveLayers();
+      renderChart();
+    });
+    el.appendChild(label);
+  });
+}
+
+function renderMedForm() {
+  const sel = document.getElementById('medCategory');
+  sel.innerHTML = categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+}
+
+function renderMedTable() {
+  const tbody = document.querySelector('#medTable tbody');
+  tbody.innerHTML = '';
+  document.getElementById('medEmpty').style.display = meds.length ? 'none' : 'block';
+  const sorted = [...meds].sort((a,b) => parseDate(a.start) - parseDate(b.start));
+  sorted.forEach((m) => {
+    const i = meds.indexOf(m);
+    const cat = categories.find(c => c.id === m.categoryId);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${cat ? cat.name : '—'}</td><td>${m.name}${m.uncertain ? ' <em style="color:var(--muted)">(unconfirmed)</em>' : ''}</td><td>${m.start}</td><td>${m.end === TODAY ? 'ongoing' : m.end}</td>
+      <td class="del"><button data-i="${i}">Remove</button></td>`;
+    tr.querySelector('button').addEventListener('click', () => {
+      meds.splice(i, 1);
+      saveMeds();
+      render();
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+function renderVitalTable() {
+  const tbody = document.querySelector('#vitalTable tbody');
+  tbody.innerHTML = '';
+  document.getElementById('vitalEmpty').style.display = vitals.length ? 'none' : 'block';
+  const sorted = [...vitals].sort((a,b) => parseDate(a.date) - parseDate(b.date));
+  sorted.forEach((v) => {
+    const i = vitals.indexOf(v);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${v.date}</td><td>${v.weight ?? '—'}</td><td>${v.sys ?? '—'}</td><td>${v.dia ?? '—'}</td>
+      <td class="del"><button data-i="${i}">Remove</button></td>`;
+    tr.querySelector('button').addEventListener('click', () => {
+      vitals.splice(i, 1);
+      saveVitals();
+      render();
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+// ---- Chart rendering ----
+function renderChart() {
+  const svg = document.getElementById('chart');
+  svg.innerHTML = '';
+
+  const W = 980, H = 480;
+  const marginLeft = 170, marginRight = 60, marginTop = 20, marginBottom = 40;
+  const plotW = W - marginLeft - marginRight;
+  const plotTop = marginTop;
+
+  let years = [];
+  meds.forEach(m => { years.push(toDecimalYear(m.start)); years.push(toDecimalYear(m.end || TODAY)); });
+  vitals.forEach(v => years.push(toDecimalYear(v.date)));
+  if (years.length === 0) { years = [2020, 2026]; }
+  let yearMin = Math.floor(Math.min(...years));
+  let yearMax = Math.ceil(Math.max(...years));
+  if (yearMax - yearMin < 3) { yearMax = yearMin + 3; }
+
+  const xScale = (yr) => marginLeft + ((yr - yearMin) / (yearMax - yearMin)) * plotW;
+
+  const laneHeight = 24, laneGap = 5, catGap = 16;
+  const catLayout = {};
+  let yCursor = plotTop;
+  categories.forEach(cat => {
+    const catMeds = meds.filter(m => m.categoryId === cat.id).sort((a,b) => parseDate(a.start) - parseDate(b.start));
+    const lanesEnd = [];
+    catMeds.forEach(m => {
+      const s = toDecimalYear(m.start), e = toDecimalYear(m.end || TODAY);
+      let lane = lanesEnd.findIndex(endY => endY <= s + 0.01);
+      if (lane === -1) { lane = lanesEnd.length; }
+      lanesEnd[lane] = e;
+      m._lane = lane;
+    });
+    const numLanes = Math.max(1, lanesEnd.length);
+    const bandHeight = numLanes * (laneHeight + laneGap) + 8;
+    catLayout[cat.id] = { top: yCursor, height: bandHeight, meds: catMeds };
+    yCursor += bandHeight + catGap;
+  });
+  const catAreaBottom = yCursor - catGap;
+  const overlayTop = plotTop;
+  const overlayBottom = Math.max(catAreaBottom, plotTop + 140);
+  const totalHeight = overlayBottom;
+
+  svg.setAttribute('viewBox', `0 0 ${W} ${totalHeight + marginBottom}`);
+
+  function el(tag, attrs, text) {
+    const e = document.createElementNS(SVG_NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+
+  for (let y = yearMin; y <= yearMax; y++) {
+    const x = xScale(y);
+    svg.appendChild(el('line', { x1: x, x2: x, y1: overlayTop, y2: overlayBottom, class: 'grid-line' }));
+    svg.appendChild(el('text', { x: x, y: overlayBottom + 18, class: 'year-label', 'text-anchor': 'middle' }, y));
+  }
+
+  categories.forEach(cat => {
+    if (layerState[cat.id] === false) return;
+    const layout = catLayout[cat.id];
+    const color = resolveColor(cat.color);
+    svg.appendChild(el('text', { x: 8, y: layout.top + 15, class: 'cat-label' }, cat.name));
+
+    layout.meds.forEach(m => {
+      const x1 = xScale(toDecimalYear(m.start));
+      const x2 = xScale(toDecimalYear(m.end || TODAY));
+      const y = layout.top + 6 + m._lane * (laneHeight + laneGap);
+      const w = Math.max(x2 - x1, 3);
+      const rect = el('rect', {
+        x: x1, y: y, width: w, height: laneHeight, rx: 5,
+        fill: color, opacity: m.uncertain ? 0.35 : 0.88,
+        'stroke-dasharray': m.uncertain ? '5,3' : 'none',
+        stroke: m.uncertain ? color : 'none',
+        'stroke-width': m.uncertain ? 1.5 : 0
+      });
+      svg.appendChild(rect);
+      rect.appendChild(el('title', {}, `${m.name} (${m.start} to ${m.end === TODAY ? 'present' : m.end})${m.uncertain ? ' - unconfirmed' : ''}`));
+      if (w > 55) {
+        svg.appendChild(el('text', {
+          x: x1 + 6, y: y + laneHeight / 2 + 3.5, class: 'med-bar-label',
+          fill: m.uncertain ? resolveColor('var(--ink)') : '#fff'
+        }, m.name.length > Math.floor(w / 6) ? m.name.slice(0, Math.floor(w / 6) - 1) + '…' : m.name));
+      }
+    });
+  });
+
+  const sortedVitals = [...vitals].sort((a,b) => parseDate(a.date) - parseDate(b.date));
+  function drawLine(key, color, dashed, label) {
+    const pts = sortedVitals.filter(v => v[key] !== undefined && v[key] !== null && v[key] !== '');
+    if (pts.length === 0) return;
+    const vals = pts.map(p => Number(p[key]));
+    let vMin = Math.min(...vals), vMax = Math.max(...vals);
+    if (vMin === vMax) { vMin -= 1; vMax += 1; }
+    const pad = (vMax - vMin) * 0.15;
+    vMin -= pad; vMax += pad;
+    const yFor = (v) => overlayBottom - ((v - vMin) / (vMax - vMin)) * (overlayBottom - overlayTop);
+    const pathD = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${xScale(toDecimalYear(p.date))} ${yFor(Number(p[key]))}`).join(' ');
+    svg.appendChild(el('path', { d: pathD, fill: 'none', stroke: color, 'stroke-width': 2.5, 'stroke-dasharray': dashed ? '6,4' : 'none' }));
+    pts.forEach(p => {
+      svg.appendChild(el('circle', { cx: xScale(toDecimalYear(p.date)), cy: yFor(Number(p[key])), r: 3.5, fill: color }));
+    });
+    svg.appendChild(el('text', { x: W - marginRight + 8, y: yFor(vMax) + 4, class: 'axis-tick-label', fill: color }, label + ' ' + Math.round(vMax)));
+    svg.appendChild(el('text', { x: W - marginRight + 8, y: yFor(vMin) + 4, class: 'axis-tick-label', fill: color }, Math.round(vMin)));
+  }
+
+  if (layerState.weight !== false) drawLine('weight', resolveColor('var(--weight)'), false, 'Wt');
+  if (layerState.systolic !== false) drawLine('sys', resolveColor('var(--systolic)'), false, 'Sys');
+  if (layerState.diastolic !== false) drawLine('dia', resolveColor('var(--diastolic)'), true, 'Dia');
+
+  if (vitals.length === 0) {
+    svg.appendChild(el('text', { x: marginLeft, y: overlayBottom + 34, class: 'note-text' }, 'Add weight/BP readings in the tab below to layer them on this chart.'));
+  }
+}
+
+document.getElementById('medForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const categoryId = document.getElementById('medCategory').value;
+  const name = document.getElementById('medName').value.trim();
+  const start = document.getElementById('medStart').value;
+  const end = document.getElementById('medEnd').value || TODAY;
+  if (!name || !start) return;
+  meds.push({ categoryId, name, start, end });
+  saveMeds();
+  e.target.reset();
+  render();
+});
+
+document.getElementById('vitalForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const date = document.getElementById('vitalDate').value;
+  const weight = document.getElementById('vitalWeight').value;
+  const sys = document.getElementById('vitalSys').value;
+  const dia = document.getElementById('vitalDia').value;
+  if (!date) return;
+  vitals.push({
+    date,
+    weight: weight ? parseFloat(weight) : null,
+    sys: sys ? parseFloat(sys) : null,
+    dia: dia ? parseFloat(dia) : null
+  });
+  saveVitals();
+  e.target.reset();
+  render();
+});
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-med').style.display = tab.dataset.tab === 'med' ? 'block' : 'none';
+    document.getElementById('tab-vital').style.display = tab.dataset.tab === 'vital' ? 'block' : 'none';
+  });
+});
+
+document.getElementById('clearAll').addEventListener('click', async () => {
+  if (!confirm('Reset medications back to the default reconstructed history and clear all vitals? This cannot be undone.')) return;
+  meds = JSON.parse(JSON.stringify(DEFAULT_MEDS));
+  vitals = JSON.parse(JSON.stringify(DEFAULT_VITALS));
+  await saveMeds(); await saveVitals();
+  render();
+});
+
+loadAll();
+</script>
+</body>
+</html>
