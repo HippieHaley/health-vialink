@@ -207,9 +207,24 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 const TODAY = "2026-08-29";
 
 const categories = [
-  { id: 'ssri', name: 'SSRI / Antidepressant', color: 'var(--ssri)' },
-  { id: 'sleep', name: 'Sleep med', color: 'var(--sleep)' },
-  { id: 'adhd', name: 'ADHD med', color: 'var(--adhd)' }
+  {
+    id: 'ssri',
+    name: 'SSRI / Antidepressant',
+    color: 'var(--ssri)',
+    colors: ['var(--ssri)', '#6f93bf', '#8aa7cb', '#4d749d', '#b7c9df']
+  },
+  {
+    id: 'sleep',
+    name: 'Sleep med',
+    color: 'var(--sleep)',
+    colors: ['var(--sleep)', '#5da68a', '#7db4a1', '#3e8a6d', '#c4ddd4']
+  },
+  {
+    id: 'adhd',
+    name: 'ADHD med',
+    color: 'var(--adhd)',
+    colors: ['var(--adhd)', '#d9a964', '#e5bf82', '#b97a2d', '#f5d9a7']
+  }
 ];
 
 // Pre-populated from the user's reconstructed medication history
