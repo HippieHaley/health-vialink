@@ -239,24 +239,24 @@ function buildMedicationPalette(count) {
 // Pre-populated from the user's reconstructed medication history
 const DEFAULT_MEDS = [
   // SSRI / antidepressant
-  { categoryId: 'ssri', name: 'Fluoxetine (Prozac) 10mg', start: '2018-10-04', end: '2018-10-23' },
-  { categoryId: 'ssri', name: 'Bupropion XL 150mg', start: '2018-12-05', end: '2020-05-18' },
-  { categoryId: 'ssri', name: 'Bupropion SR 200mg', start: '2020-06-10', end: '2020-12-17' },
-  { categoryId: 'ssri', name: 'Bupropion SR 200mg + Venlafaxine XR 75mg', start: '2021-07-29', end: '2022-01-19' },
-  { categoryId: 'ssri', name: 'Venlafaxine XR 75mg', start: '2022-02-16', end: '2026-01-27' },
-  { categoryId: 'ssri', name: 'Venlafaxine XR 75mg (unconfirmed after last visit)', start: '2026-01-27', end: TODAY, uncertain: true },
+  { categoryId: 'ssri', name: 'Fluoxetine (Prozac) 10 mg capsule', start: '2018-10-04', end: '2018-12-05' },
+  { categoryId: 'ssri', name: 'Bupropion XL (Wellbutrin XL) 150 mg 24 hr tablet', start: '2018-12-05', end: '2020-06-10' },
+  { categoryId: 'ssri', name: 'Bupropion SR (Wellbutrin SR) 200 mg 12 hr tablet', start: '2020-06-10', end: '2021-07-29' },
+  { categoryId: 'ssri', name: 'Bupropion SR (Wellbutrin SR) 200 mg 12 hr tablet + Venlafaxine XR (Effexor-XR) 75 mg 24 hr capsule', start: '2021-07-29', end: '2022-02-16' },
+  { categoryId: 'ssri', name: 'Venlafaxine XR (Effexor-XR) 75 mg 24 hr capsule', start: '2022-02-16', end: '2026-01-27' },
+  { categoryId: 'ssri', name: 'Venlafaxine XR (Effexor-XR) 75 mg 24 hr capsule (unconfirmed after last visit)', start: '2026-01-27', end: TODAY, uncertain: true },
 
   // Sleep med
-  { categoryId: 'sleep', name: 'Lorazepam (Ativan) 0.5mg', start: '2017-12-08', end: '2022-01-19' },
-  { categoryId: 'sleep', name: 'Zolpidem CR (Ambien CR) 12.5mg', start: '2022-02-16', end: '2022-10-27' },
-  { categoryId: 'sleep', name: 'Temazepam (Restoril) 15mg', start: '2023-04-12', end: '2025-04-21' },
-  { categoryId: 'sleep', name: 'Temazepam 15mg + Quetiapine (Seroquel) 25mg', start: '2025-07-10', end: '2025-07-21' },
-  { categoryId: 'sleep', name: 'Temazepam (Restoril) 15mg', start: '2026-01-27', end: TODAY, uncertain: true },
+  { categoryId: 'sleep', name: 'Lorazepam (Ativan) 0.5 mg tablet', start: '2017-12-08', end: '2022-02-16' },
+  { categoryId: 'sleep', name: 'Zolpidem CR (Ambien CR) 12.5 mg CR tablet', start: '2022-02-16', end: '2023-04-12' },
+  { categoryId: 'sleep', name: 'Temazepam (Restoril) 15 mg capsule', start: '2023-04-12', end: '2025-07-10' },
+  { categoryId: 'sleep', name: 'Quetiapine (Seroquel) 25 mg tablet + Temazepam (Restoril) 15 mg capsule', start: '2025-07-10', end: '2026-01-27' },
+  { categoryId: 'sleep', name: 'Temazepam (Restoril) 15 mg capsule (unconfirmed after last visit)', start: '2026-01-27', end: TODAY, uncertain: true },
 
   // ADHD med
-  { categoryId: 'adhd', name: 'Amph-dextroamph XR 10mg', start: '2022-02-16', end: '2022-06-15' },
-  { categoryId: 'adhd', name: 'Amph-dextroamph XR 20mg', start: '2022-06-16', end: '2024-12-30' },
-  { categoryId: 'adhd', name: 'Amph-dextroamph XR 25mg + 5mg tablet', start: '2025-04-21', end: TODAY }
+  { categoryId: 'adhd', name: 'Amphetamine-dextroamphetamine XR 10 mg 24 hr capsule', start: '2022-02-16', end: '2022-06-16' },
+  { categoryId: 'adhd', name: 'Amphetamine-dextroamphetamine XR 20 mg 24 hr capsule', start: '2022-06-16', end: '2025-04-21' },
+  { categoryId: 'adhd', name: 'Amphetamine-dextroamphetamine XR 25 mg 24 hr capsule + amphetamine-dextroamphetamine 5 mg tablet', start: '2025-04-21', end: TODAY }
 ];
 
 // Pre-populated from the user's uploaded weight readings
