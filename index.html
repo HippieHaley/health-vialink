@@ -210,22 +210,20 @@ const categories = [
   {
     id: 'ssri',
     name: 'SSRI / Antidepressant',
-    color: 'var(--ssri)',
-    colors: ['var(--ssri)', '#6f93bf', '#8aa7cb', '#4d749d', '#b7c9df']
+    color: 'var(--ssri)'
   },
   {
     id: 'sleep',
     name: 'Sleep med',
-    color: 'var(--sleep)',
-    colors: ['var(--sleep)', '#5da68a', '#7db4a1', '#3e8a6d', '#c4ddd4']
+    color: 'var(--sleep)'
   },
   {
     id: 'adhd',
     name: 'ADHD med',
-    color: 'var(--adhd)',
-    colors: ['var(--adhd)', '#d9a964', '#e5bf82', '#b97a2d', '#f5d9a7']
+    color: 'var(--adhd)'
   }
 ];
+const MED_CHANGE_COLORS = ['#3b6fa0', '#5ca6a4', '#d9a964', '#b3486f', '#6a4fb0', '#8aa7cb', '#2f8f6f', '#e5bf82', '#9a86d8'];
 
 // Pre-populated from the user's reconstructed medication history
 const DEFAULT_MEDS = [
@@ -503,7 +501,8 @@ function renderChart() {
   categories.forEach(cat => {
     const catMeds = meds.filter(m => m.categoryId === cat.id).sort((a,b) => parseDate(a.start) - parseDate(b.start));
     const lanesEnd = [];
-    catMeds.forEach(m => {
+    catMeds.forEach((m, index) => {
+      m._colorIndex = index;
       const s = toDecimalYear(m.start), e = toDecimalYear(m.end || TODAY);
       let lane = lanesEnd.findIndex(endY => endY <= s + 0.01);
       if (lane === -1) { lane = lanesEnd.length; }
@@ -538,10 +537,10 @@ function renderChart() {
   categories.forEach(cat => {
     if (layerState[cat.id] === false) return;
     const layout = catLayout[cat.id];
-    const color = resolveColor(cat.color);
     svg.appendChild(el('text', { x: 8, y: layout.top + 15, class: 'cat-label' }, cat.name));
 
     layout.meds.forEach(m => {
+      const color = MED_CHANGE_COLORS[(m._colorIndex ?? 0) % MED_CHANGE_COLORS.length];
       const x1 = xScale(toDecimalYear(m.start));
       const x2 = xScale(toDecimalYear(m.end || TODAY));
       const y = layout.top + 6 + m._lane * (laneHeight + laneGap);
