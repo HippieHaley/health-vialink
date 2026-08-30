@@ -147,6 +147,7 @@
 
     <div id="tab-med">
       <form class="entry" id="medForm">
+        <input type="hidden" id="medEditIndex" value="">
         <div class="field">
           <label class="f">Category</label>
           <select id="medCategory"></select>
@@ -163,7 +164,8 @@
           <label class="f">End date</label>
           <input id="medEnd" type="date" placeholder="blank = ongoing">
         </div>
-        <button type="submit">Add medication</button>
+        <button type="submit" id="medSubmitBtn">Add medication</button>
+        <button type="button" id="medCancelEdit" style="display:none;">Cancel</button>
       </form>
       <table id="medTable">
         <thead><tr><th>Category</th><th>Medication</th><th>Start</th><th>End</th><th></th></tr></thead>
@@ -445,6 +447,26 @@ function renderMedForm() {
   sel.innerHTML = categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
 }
 
+function resetMedForm() {
+  document.getElementById('medForm').reset();
+  document.getElementById('medEditIndex').value = '';
+  document.getElementById('medSubmitBtn').textContent = 'Add medication';
+  document.getElementById('medCancelEdit').style.display = 'none';
+}
+
+function populateMedFormForEdit(index) {
+  const m = meds[index];
+  if (!m) return;
+  document.getElementById('medEditIndex').value = String(index);
+  document.getElementById('medCategory').value = m.categoryId;
+  document.getElementById('medName').value = m.name;
+  document.getElementById('medStart').value = m.start;
+  document.getElementById('medEnd').value = m.end === TODAY ? '' : m.end;
+  document.getElementById('medSubmitBtn').textContent = 'Save changes';
+  document.getElementById('medCancelEdit').style.display = 'inline-block';
+  document.getElementById('medName').focus();
+}
+
 function renderMedTable() {
   const tbody = document.querySelector('#medTable tbody');
   tbody.innerHTML = '';
@@ -455,11 +477,21 @@ function renderMedTable() {
     const cat = categories.find(c => c.id === m.categoryId);
     const tr = document.createElement('tr');
     tr.innerHTML = `<td>${cat ? cat.name : '—'}</td><td>${m.name}${m.uncertain ? ' <em style="color:var(--muted)">(unconfirmed)</em>' : ''}</td><td>${m.start}</td><td>${m.end === TODAY ? 'ongoing' : m.end}</td>
-      <td class="del"><button data-i="${i}">Remove</button></td>`;
-    tr.querySelector('button').addEventListener('click', () => {
-      meds.splice(i, 1);
-      saveMeds();
-      render();
+      <td class="del">
+        <button type="button" data-action="edit" data-i="${i}">Edit</button>
+        <button type="button" data-action="remove" data-i="${i}">Remove</button>
+      </td>`;
+    tr.querySelectorAll('button').forEach((button) => {
+      button.addEventListener('click', () => {
+        const action = button.dataset.action;
+        if (action === 'remove') {
+          meds.splice(i, 1);
+          saveMeds();
+          render();
+          return;
+        }
+        populateMedFormForEdit(i);
+      });
     });
     tbody.appendChild(tr);
   });
@@ -630,10 +662,21 @@ document.getElementById('medForm').addEventListener('submit', (e) => {
   const start = document.getElementById('medStart').value;
   const end = document.getElementById('medEnd').value || TODAY;
   if (!name || !start) return;
-  meds.push({ categoryId, name, start, end });
+
+  const editIndex = document.getElementById('medEditIndex').value;
+  if (editIndex !== '') {
+    meds[Number(editIndex)] = { ...meds[Number(editIndex)], categoryId, name, start, end };
+  } else {
+    meds.push({ categoryId, name, start, end });
+  }
+
   saveMeds();
-  e.target.reset();
+  resetMedForm();
   render();
+});
+
+document.getElementById('medCancelEdit').addEventListener('click', () => {
+  resetMedForm();
 });
 
 document.getElementById('vitalForm').addEventListener('submit', (e) => {
