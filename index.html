@@ -673,12 +673,21 @@ function toDecimalYear(str) {
   return dt.getFullYear() + frac;
 }
 
+function scrollChartToEnd() {
+  const scrollArea = document.querySelector('.chart-scroll');
+  if (!scrollArea) return;
+  requestAnimationFrame(() => {
+    scrollArea.scrollLeft = scrollArea.scrollWidth;
+  });
+}
+
 function render() {
   renderLayerToggles();
   renderMedForm();
   renderMedTable();
   renderVitalTable();
   renderChart();
+  scrollChartToEnd();
 }
 
 function renderLayerToggles() {
@@ -1142,6 +1151,7 @@ function renderChart() {
   }
 
   attachChartHoverTracking();
+  scrollChartToEnd();
 }
 
 const medForm = document.getElementById('medForm');
