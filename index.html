@@ -925,7 +925,8 @@ function attachChartHoverTracking() {
 
   const updateTooltip = (event) => {
     const rect = svg.getBoundingClientRect();
-    const x = event.clientX - rect.left;
+    const viewBoxWidth = svg.viewBox.baseVal.width || 980;
+    const x = ((event.clientX - rect.left) / rect.width) * viewBoxWidth;
     const yearMin = Number(svg.dataset.yearMin || 2020);
     const yearMax = Number(svg.dataset.yearMax || 2026);
     const marginLeft = Number(svg.dataset.marginLeft || 170);
