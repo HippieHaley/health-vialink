@@ -223,7 +223,16 @@ const categories = [
     color: 'var(--adhd)'
   }
 ];
-const MED_CHANGE_COLORS = ['#3b6fa0', '#5ca6a4', '#d9a964', '#b3486f', '#6a4fb0', '#8aa7cb', '#2f8f6f', '#e5bf82', '#9a86d8'];
+function buildMedicationPalette(count) {
+  const palette = [];
+  for (let i = 0; i < count; i++) {
+    const hue = (i * 137.508) % 360;
+    const saturation = 68;
+    const lightness = 52 + (i % 4) * 4;
+    palette.push(`hsl(${hue} ${saturation}% ${lightness}%)`);
+  }
+  return palette;
+}
 
 // Pre-populated from the user's reconstructed medication history
 const DEFAULT_MEDS = [
@@ -496,13 +505,18 @@ function renderChart() {
   const xScale = (yr) => marginLeft + ((yr - yearMin) / (yearMax - yearMin)) * plotW;
 
   const laneHeight = 24, laneGap = 5, catGap = 16;
+  const medPalette = buildMedicationPalette(Math.max(1, meds.length));
+  const medsInTimeOrder = [...meds].sort((a, b) => parseDate(a.start) - parseDate(b.start));
+  medsInTimeOrder.forEach((m, index) => {
+    m._colorIndex = index;
+  });
+
   const catLayout = {};
   let yCursor = plotTop;
   categories.forEach(cat => {
     const catMeds = meds.filter(m => m.categoryId === cat.id).sort((a,b) => parseDate(a.start) - parseDate(b.start));
     const lanesEnd = [];
-    catMeds.forEach((m, index) => {
-      m._colorIndex = index;
+    catMeds.forEach(m => {
       const s = toDecimalYear(m.start), e = toDecimalYear(m.end || TODAY);
       let lane = lanesEnd.findIndex(endY => endY <= s + 0.01);
       if (lane === -1) { lane = lanesEnd.length; }
@@ -540,7 +554,7 @@ function renderChart() {
     svg.appendChild(el('text', { x: 8, y: layout.top + 15, class: 'cat-label' }, cat.name));
 
     layout.meds.forEach(m => {
-      const color = MED_CHANGE_COLORS[(m._colorIndex ?? 0) % MED_CHANGE_COLORS.length];
+      const color = medPalette[(m._colorIndex ?? 0) % medPalette.length];
       const x1 = xScale(toDecimalYear(m.start));
       const x2 = xScale(toDecimalYear(m.end || TODAY));
       const y = layout.top + 6 + m._lane * (laneHeight + laneGap);
