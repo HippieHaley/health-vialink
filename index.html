@@ -21,6 +21,7 @@
     --systolic: #ff8800;
     --diastolic: #ee0707;
     --pulse: #003524;
+    --temp: #86efac;
     --radius: 18px;
     --shadow: rgba(0, 0, 0, 0);
   }
@@ -471,6 +472,10 @@
           <label class="f">Diastolic BP</label>
           <input id="vitalDia" type="number" placeholder="80">
         </div>
+        <div class="field">
+          <label class="f">Temp (°F)</label>
+          <input id="vitalTemp" type="number" step="0.1" placeholder="98.6">
+        </div>
         <button type="submit">Add reading</button>
       </form>
       <table id="vitalTable">
@@ -480,6 +485,8 @@
             <th><button type="button" class="table-header-button" data-table="vital" data-key="weight">Weight</button></th>
             <th><button type="button" class="table-header-button" data-table="vital" data-key="sys">Systolic</button></th>
             <th><button type="button" class="table-header-button" data-table="vital" data-key="dia">Diastolic</button></th>
+            <th><button type="button" class="table-header-button" data-table="vital" data-key="pulse">Pulse</button></th>
+            <th><button type="button" class="table-header-button" data-table="vital" data-key="temp">Temp</button></th>
             <th></th>
           </tr>
         </thead>
@@ -692,13 +699,60 @@ const DEFAULT_PULSE_VITALS = [
   { date: '2016-01-15', pulse: 68, time: '1:39 PM' }
 ];
 
+const DEFAULT_TEMP_VITALS = [
+  { date: '2026-07-23', temp: 97.1, time: '5:31 PM' },
+  { date: '2026-02-11', temp: 97.4, time: '1:50 PM' },
+  { date: '2026-01-27', temp: 98.2, time: '11:12 AM' },
+  { date: '2026-01-08', temp: 97.6, time: '6:48 PM' },
+  { date: '2026-01-08', temp: 96.7, time: '5:12 PM' },
+  { date: '2025-08-29', temp: 97.8, time: '4:38 PM' },
+  { date: '2025-07-21', temp: 97.1, time: '2:33 PM' },
+  { date: '2025-07-10', temp: 97.5, time: '2:02 PM' },
+  { date: '2025-04-21', temp: 98.4, time: '2:24 PM' },
+  { date: '2024-08-15', temp: 98.4, time: '3:11 PM' },
+  { date: '2024-03-17', temp: 97.7, time: '5:54 PM' },
+  { date: '2023-11-21', temp: 97.4, time: '1:01 PM' },
+  { date: '2023-07-21', temp: 98.2, time: '12:29 PM' },
+  { date: '2023-07-18', temp: 96.6, time: '7:19 AM' },
+  { date: '2023-05-31', temp: 97.0, time: '10:10 AM' },
+  { date: '2023-05-31', temp: 97.7, time: '9:36 AM' },
+  { date: '2023-05-18', temp: 98.0, time: '3:03 PM' },
+  { date: '2023-04-12', temp: 98.4, time: '11:27 AM' },
+  { date: '2022-10-27', temp: 98.3, time: '3:40 PM' },
+  { date: '2022-07-25', temp: 99.0, time: '2:39 PM' },
+  { date: '2022-07-07', temp: 98.0, time: '2:49 PM' },
+  { date: '2022-06-16', temp: 97.3, time: '3:07 PM' },
+  { date: '2022-02-16', temp: 97.9, time: '3:53 PM' },
+  { date: '2022-01-19', temp: 98.4, time: '3:38 PM' },
+  { date: '2021-03-18', temp: 98.6, time: '6:55 PM' },
+  { date: '2021-03-18', temp: 97.9, time: '4:42 PM' },
+  { date: '2020-12-17', temp: 98.2, time: '9:57 AM' },
+  { date: '2020-09-17', temp: 98.7, time: '9:45 AM' },
+  { date: '2020-09-09', temp: 99.4, time: '9:56 AM' },
+  { date: '2020-07-14', temp: 98.1, time: '9:19 AM' },
+  { date: '2020-06-03', temp: 98.6, time: '4:49 PM' },
+  { date: '2020-05-18', temp: 98.8, time: '1:12 PM' },
+  { date: '2020-04-26', temp: 98.8, time: '9:43 AM' },
+  { date: '2020-04-15', temp: 97.7, time: '8:34 AM' },
+  { date: '2020-04-08', temp: 99.0, time: '7:23 AM' },
+  { date: '2020-01-24', temp: 98.5, time: '6:14 PM' },
+  { date: '2019-10-22', temp: 97.8, time: '4:49 PM' },
+  { date: '2019-10-04', temp: 98.4, time: '5:20 PM' },
+  { date: '2019-05-14', temp: 98.8, time: '6:36 PM' },
+  { date: '2019-04-18', temp: 99.4, time: '5:33 PM' },
+  { date: '2019-02-04', temp: 97.6, time: '1:42 AM' },
+  { date: '2018-10-24', temp: 97.7, time: '12:13 PM' },
+  { date: '2018-02-02', temp: 98.6, time: '2:23 PM' },
+  { date: '2018-01-18', temp: 99.1, time: '11:27 AM' }
+];
+
 const VITALS_SEED_VERSION = 2;
 let meds = [];
 let vitals = [];
 let medTableState = { key: 'start', dir: 'asc' };
 let vitalTableState = { key: 'date', dir: 'asc' };
 let chartRange = { start: '', end: '' };
-let layerState = { ssri: true, sleep: true, adhd: true, weight: false, systolic: false, diastolic: false, pulse: true };
+let layerState = { ssri: true, sleep: true, adhd: true, weight: false, systolic: false, diastolic: false, pulse: true, temp: true };
 
 function getChartRangeDates() {
   const start = chartRange.start ? parseDate(chartRange.start) : null;
@@ -723,7 +777,11 @@ async function loadAll() {
     if (v) { vitals = JSON.parse(v.value); hasStoredVitals = true; }
   } catch (e) {}
   if (!hasStoredVitals) {
-    vitals = [...JSON.parse(JSON.stringify(DEFAULT_VITALS)), ...JSON.parse(JSON.stringify(DEFAULT_PULSE_VITALS))];
+    vitals = [
+      ...JSON.parse(JSON.stringify(DEFAULT_VITALS)),
+      ...JSON.parse(JSON.stringify(DEFAULT_PULSE_VITALS)),
+      ...JSON.parse(JSON.stringify(DEFAULT_TEMP_VITALS))
+    ];
     saveVitals();
   } else {
     const existingDates = new Set(vitals.map(v => v.date));
@@ -733,6 +791,10 @@ async function loadAll() {
     });
     DEFAULT_PULSE_VITALS.forEach(dv => {
       const matches = vitals.some(v => v.date === dv.date && v.pulse === dv.pulse && (v.time || '') === (dv.time || ''));
+      if (!matches) { vitals.push(JSON.parse(JSON.stringify(dv))); added = true; }
+    });
+    DEFAULT_TEMP_VITALS.forEach(dv => {
+      const matches = vitals.some(v => v.date === dv.date && v.temp === dv.temp && (v.time || '') === (dv.time || ''));
       if (!matches) { vitals.push(JSON.parse(JSON.stringify(dv))); added = true; }
     });
     if (added) saveVitals();
@@ -746,6 +808,7 @@ async function loadAll() {
   } catch (e) {}
 
   if (layerState.pulse === undefined) layerState.pulse = true;
+  if (layerState.temp === undefined) layerState.temp = true;
 
   render();
 }
@@ -883,7 +946,8 @@ function renderLayerToggles() {
     { key: 'weight', label: 'Weight', color: resolveColor('var(--weight)'), type: 'line' },
     { key: 'systolic', label: 'Systolic BP', color: resolveColor('var(--systolic)'), type: 'line' },
     { key: 'diastolic', label: 'Diastolic BP', color: resolveColor('var(--diastolic)'), type: 'line' },
-    { key: 'pulse', label: 'Pulse', color: resolveColor('var(--pulse)'), type: 'line' }
+    { key: 'pulse', label: 'Pulse', color: resolveColor('var(--pulse)'), type: 'line' },
+    { key: 'temp', label: 'Temp', color: resolveColor('var(--temp)'), type: 'line' }
   ];
 
   items.forEach((item) => {
@@ -943,6 +1007,7 @@ function getVitalSortValue(v, key) {
   if (key === 'sys') return typeof v.sys === 'number' ? v.sys : Number.NEGATIVE_INFINITY;
   if (key === 'dia') return typeof v.dia === 'number' ? v.dia : Number.NEGATIVE_INFINITY;
   if (key === 'pulse') return typeof v.pulse === 'number' ? v.pulse : Number.NEGATIVE_INFINITY;
+  if (key === 'temp') return typeof v.temp === 'number' ? v.temp : Number.NEGATIVE_INFINITY;
   return '';
 }
 
@@ -1037,7 +1102,7 @@ function renderVitalTable() {
   sorted.forEach((v) => {
     const i = vitals.indexOf(v);
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${v.date}</td><td>${v.weight ?? '—'}</td><td>${v.sys ?? '—'}</td><td>${v.dia ?? '—'}</td><td>${v.pulse ?? '—'}</td>
+    tr.innerHTML = `<td>${v.date}</td><td>${v.weight ?? '—'}</td><td>${v.sys ?? '—'}</td><td>${v.dia ?? '—'}</td><td>${v.pulse ?? '—'}</td><td>${v.temp ?? '—'}</td>
       <td class="del"><button data-i="${i}">Remove</button></td>`;
 
     const removeBtn = tr.querySelector('button');
@@ -1131,7 +1196,8 @@ function getClosestVitalSnapshot(dateObj) {
     weight: getAverageMetricValue(matches, 'weight'),
     sys: getAverageMetricValue(matches, 'sys'),
     dia: getAverageMetricValue(matches, 'dia'),
-    pulse: getAverageMetricValue(matches, 'pulse')
+    pulse: getAverageMetricValue(matches, 'pulse'),
+    temp: getAverageMetricValue(matches, 'temp')
   };
 }
 
@@ -1153,7 +1219,8 @@ function getSelectedVitalMetrics(showAll = false) {
     { key: 'weight', label: 'Weight', enabled: layerState.weight },
     { key: 'sys', label: 'Systolic', enabled: layerState.systolic },
     { key: 'dia', label: 'Diastolic', enabled: layerState.diastolic },
-    { key: 'pulse', label: 'Pulse', enabled: layerState.pulse }
+    { key: 'pulse', label: 'Pulse', enabled: layerState.pulse },
+    { key: 'temp', label: 'Temp', enabled: layerState.temp }
   ];
 
   return metricOrder.filter((item) => showAll || item.enabled);
@@ -1185,7 +1252,10 @@ function attachChartHoverTracking() {
     if (vital) {
       const metricLines = activeMetrics.map((metric) => {
         const value = vital[metric.key];
-        return value != null ? `${metric.label}: ${value}${metric.key === 'weight' ? ' lb' : ''}` : null;
+        if (value == null) return null;
+        if (metric.key === 'weight') return `${metric.label}: ${value} lb`;
+        if (metric.key === 'temp') return `${metric.label}: ${value}°F`;
+        return `${metric.label}: ${value}`;
       }).filter(Boolean);
 
       if (metricLines.length) {
@@ -1431,6 +1501,9 @@ function renderChart() {
   if (layerState.pulse) {
     drawLine('pulse', resolveColor('var(--pulse)'), 'Pulse');
   }
+  if (layerState.temp) {
+    drawLine('temp', resolveColor('var(--temp)'), 'Temp');
+  }
 
   attachChartHoverTracking();
   scrollChartToEnd();
@@ -1469,6 +1542,7 @@ document.getElementById('vitalForm').addEventListener('submit', (e) => {
   const sys = document.getElementById('vitalSys').value;
   const dia = document.getElementById('vitalDia').value;
   const pulse = document.getElementById('vitalPulse').value;
+  const temp = document.getElementById('vitalTemp').value;
   if (!date) return;
 
   vitals.push({
@@ -1476,7 +1550,8 @@ document.getElementById('vitalForm').addEventListener('submit', (e) => {
     weight: weight === '' ? null : Number(weight),
     sys: sys === '' ? null : Number(sys),
     dia: dia === '' ? null : Number(dia),
-    pulse: pulse === '' ? null : Number(pulse)
+    pulse: pulse === '' ? null : Number(pulse),
+    temp: temp === '' ? null : Number(temp)
   });
 
   saveVitals();
@@ -1523,8 +1598,12 @@ document.getElementById('resetChartRange').addEventListener('click', () => {
 
 document.getElementById('clearAll').addEventListener('click', () => {
   meds = JSON.parse(JSON.stringify(DEFAULT_MEDS));
-  vitals = [...JSON.parse(JSON.stringify(DEFAULT_VITALS)), ...JSON.parse(JSON.stringify(DEFAULT_PULSE_VITALS))];
-  layerState = { ssri: true, sleep: true, adhd: true, weight: false, systolic: false, diastolic: false, pulse: true };
+  vitals = [
+    ...JSON.parse(JSON.stringify(DEFAULT_VITALS)),
+    ...JSON.parse(JSON.stringify(DEFAULT_PULSE_VITALS)),
+    ...JSON.parse(JSON.stringify(DEFAULT_TEMP_VITALS))
+  ];
+  layerState = { ssri: true, sleep: true, adhd: true, weight: false, systolic: false, diastolic: false, pulse: true, temp: true };
   saveMeds();
   saveVitals();
   saveLayers();
